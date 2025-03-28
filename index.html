@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulier naar PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        label, select, textarea, input { display: block; width: 100%; margin-bottom: 10px; }
+        #map-image { max-width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Formulier naar PDF</h2>
+
+        <label for="keuze1">Kies een optie:</label>
+        <select id="keuze1">
+            <option value="">-- Maak een keuze --</option>
+            <option>Optie 1</option>
+            <option>Optie 2</option>
+            <option>Optie 3</option>
+        </select>
+
+        <label for="keuze2">Extra keuze 1:</label>
+        <select id="keuze2">
+            <option value="">-- Maak een keuze --</option>
+            <option>Keuze A</option>
+            <option>Keuze B</option>
+        </select>
+
+        <label for="keuze3">Extra keuze 2:</label>
+        <select id="keuze3">
+            <option value="">-- Maak een keuze --</option>
+            <option>Keuze X</option>
+            <option>Keuze Y</option>
+        </select>
+
+        <label for="keuze4">Extra keuze 3:</label>
+        <select id="keuze4">
+            <option value="">-- Maak een keuze --</option>
+            <option>Keuze I</option>
+            <option>Keuze II</option>
+        </select>
+
+        <label for="tekstveld">Vul tekst in:</label>
+        <textarea id="tekstveld" rows="4"></textarea>
+
+        <label for="tekst1">Extra tekst 1:</label>
+        <textarea id="tekst1" rows="2"></textarea>
+
+        <label for="tekst2">Extra tekst 2:</label>
+        <textarea id="tekst2" rows="2"></textarea>
+
+        <label for="tekst3">Extra tekst 3:</label>
+        <textarea id="tekst3" rows="2"></textarea>
+
+        <label for="afbeeldingen">Upload afbeeldingen (meerdere selecteren):</label>
+        <input type="file" id="afbeeldingen" accept="image/*" multiple>
+
+        <label for="locatie">Zoek risicoligging op Google Maps:</label>
+        <input type="text" id="locatie" placeholder="Voer een locatie in">
+
+        <button onclick="genereerPDF()">Genereer PDF</button>
+        <button onclick="zoekOpGoogleMaps()">Zoek op Google Maps</button>
+
+        <!-- Afbeelding van Google Maps wordt hier weergegeven -->
+        <img id="map-image" src="" alt="Google Maps afbeelding van locatie">
+    </div>
+
+    <script>
+        function genereerPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF("p", "mm", "a4");
+
+            // Waarden ophalen
+            const keuze1 = document.getElementById("keuze1").value;
+            const keuze2 = document.getElementById("keuze2").value;
+            const keuze3 = document.getElementById("keuze3").value;
+            const keuze4 = document.getElementById("keuze4").value;
+            const tekst = document.getElementById("tekstveld").value;
+            const tekst1 = document.getElementById("tekst1").value;
+            const tekst2 = document.getElementById("tekst2").value;
+            const tekst3 = document.getElementById("tekst3").value;
+            const bestanden = document.getElementById("afbeeldingen").files;
+
+            let startY = 10;
+
+            // Alleen ingevulde velden toevoegen aan de PDF
+            if (keuze1) { doc.text("Geselecteerde optie: " + keuze1, 10, startY); startY += 10; }
+            if (keuze2) { doc.text("Extra keuze 1: " + keuze2, 10, startY); startY += 10; }
+            if (keuze3) { doc.text("Extra keuze 2: " + keuze3, 10, startY); startY += 10; }
+            if (keuze4) { doc.text("Extra keuze 3: " + keuze4, 10, startY); startY += 10; }
+
+            if (tekst.trim()) {
+                doc.text("Ingevoerde tekst:", 10, startY);
+                startY += 10;
+                doc.text(tekst, 10, startY);
+                startY += 10;
+            }
+
+            if (tekst1.trim()) { doc.text("Extra tekst 1: " + tekst1, 10, startY); startY += 10; }
+            if (tekst2.trim()) { doc.text("Extra tekst 2: " + tekst2, 10, startY); startY += 10; }
+            if (tekst3.trim()) { doc.text("Extra tekst 3: " + tekst3, 10, startY); startY += 10; }
+
+            // Afbeeldingen verwerken
+            if (bestanden.length > 0) {
+                startY += 10;
+                const kolomBreedte = 90;
+                const rijHoogte = 50;
+                const tekstHoogte = 10; // 1 cm tekstvak
+                let kolom = 0;
+
+                for (let i = 0; i < bestanden.length; i++) {
+                    const file = bestanden[i];
+                    const reader = new FileReader();
+
+                    reader.onload = function (event) {
+                        const img = new Image();
+                        img.src = event.target.result;
+
+                        img.onload = function () {
+                            const schaal = rijHoogte / img.height;
+                            const nieuweBreedte = img.width * schaal;
+                            const nieuweHoogte = rijHoogte;
+                            const afbeeldingBreedte = Math.min(nieuweBreedte, kolomBreedte - 10);
+                            const xPos = kolom === 0 ? 10 : 100 + (kolomBreedte - afbeeldingBreedte) / 2;
+                            const afbeeldingY = startY + tekstHoogte + (rijHoogte - nieuweHoogte) / 2;
+
+                            // Tabelranden tekenen
+                            doc.rect(kolom === 0 ? 10 : 100, startY, kolomBreedte, tekstHoogte + rijHoogte);
+                            doc.rect(kolom === 0 ? 10 : 100, startY, kolomBreedte, tekstHoogte);
+
+                            // Tekst boven afbeelding
+                            doc.text("Afbeelding " + (i + 1), kolom === 0 ? 15 : 105, startY + 7);
+
+                            // Afbeelding toevoegen met compressie
+                            doc.addImage(img.src, "JPEG", xPos, afbeeldingY, afbeeldingBreedte, nieuweHoogte, '', 'FAST');
+
+                            // Wissel kolom
+                            kolom = (kolom + 1) % 2;
+                            if (kolom === 0) startY += tekstHoogte + rijHoogte;
+
+                            // Nieuwe pagina als nodig
+                            if (startY + tekstHoogte + rijHoogte > 280) {
+                                doc.addPage();
+                                startY = 10;
+                            }
+
+                            if (i === bestanden.length - 1) {
+                                // Gebruik de tekst in het eerste tekstveld als bestandsnaam
+                                const pdfNaam = tekst ? `${tekst}.pdf` : 'formulier.pdf';
+                                doc.save(pdfNaam);
+                            }
+                        };
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                // Gebruik de tekst in het eerste tekstveld als bestandsnaam
+                const pdfNaam = tekst ? `${tekst}.pdf` : 'formulier.pdf';
+                doc.save(pdfNaam);
+            }
+        }
+
+        function zoekOpGoogleMaps() {
+            const locatie = document.getElementById("locatie").value;
+            if (locatie) {
+                const url = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(locatie)}&zoom=14&size=600x400&markers=color:red%7Clabel:S%7C${encodeURIComponent(locatie)}&key=YOUR_GOOGLE_MAPS_API_KEY`;
+                document.getElementById("map-image").src = url;
+            } else {
+                alert("Voer een locatie in om te zoeken.");
+            }
+        }
+    </script>
+
+</body>
+</html>
