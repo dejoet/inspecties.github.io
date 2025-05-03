@@ -1,0 +1,166 @@
+function genereerPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  let y = margin;
+
+  const bedrijf = document.getElementById("bedrijf").value;
+  const inspecteur = document.getElementById("inspecteur").value;
+  const klant = document.getElementById("klant").value;
+  const adres = document.getElementById("adres").value;
+  const datum = document.getElementById("datum").value;
+  const keuze1 = document.getElementById("keuze1").value;
+  const keuze2 = document.getElementById("keuze2").value;
+  const tekst = document.getElementById("tekstveld").value;
+  const opmerkingen = document.getElementById("tekst1").value;
+  const bestanden = document.getElementById("afbeeldingen").files;
+
+  const logo = new Image();
+  logo.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAACWCAIAAACNeWFmAAADOElEQVR4nO3by26jMABA0TCav+7HexaVUMR7klZEuucsKkqxcTe5MrTTGOMBAFV/7l4AANxJCAFIE0IA0oQQgDQhBCBNCAFIE0IA0oQQgDQhBCBNCAFIE0IA0oQQgDQhBCBNCAFIE0IA0oQQgDQhBCBNCAFIE0IA0oQQgDQhBCBNCAFIE0IA0oQQgDQhBCBNCAFIE0IA0oQQgDQhBCBNCAFIE0IA0oQQgLS/7wyepmk+HmPM3+4dr23+dIyxmPx04ME8ewvevNF6ns0zi9mujNpcDwC3e2tHOH+yfx88F2I+892DMcbimjlCz2fmy+ZRe/c6uPvzPMcLXt/ldIXzqOexe9eslwrAp3lrR3jdZnKuXHPcs5fvtTnn8R70f135RQC43a+8I1w8Gl0/S3zs7Pl+pBZX5lns5xZf91b4cs4B+Fi//scye2HYzNU0TYtt2frMxZuevmJ8rN4Onq7wSmKvvOAE4HO8FcL54369nVpspOYcLoZsHjy23rSdDtyc52DBe8V6bYXrmS8uCYB7TR7iAVDm/wgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgTQgBSBNCANKEEIA0IQQgbXp8jbvXAAC3sSMEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIE0IAUgTQgDShBCANCEEIO0fC7wNkPCljRUAAAAASUVORK5CYII=";
+  logo.onload = function () {
+    doc.addImage(logo, "PNG", margin, y, 40, 20);
+    y += 25;
+
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("Inspectierapport", pageWidth / 2, y, { align: "center" });
+    y += 10;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
+
+    const gegevens = [
+      ["Bedrijf", bedrijf],
+      ["Inspecteur", inspecteur],
+      ["Klant", klant],
+      ["Adres", adres],
+      ["Datum", datum],
+    ];
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+
+    gegevens.forEach(([label, waarde]) => {
+      if (waarde) {
+        doc.setFont("helvetica", "bold");
+        doc.text(label + ":", margin, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(waarde, margin + 40, y);
+        y += 7;
+      }
+    });
+
+    y += 5;
+    doc.setDrawColor(220);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
+
+    if (keuze1 || keuze2) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Technische informatie", margin, y);
+      y += 7;
+
+      if (keuze1) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Type inspectie:", margin, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(keuze1, margin + 50, y);
+        y += 7;
+      }
+
+      if (keuze2) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Installatie in orde:", margin, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(keuze2, margin + 50, y);
+        y += 7;
+      }
+
+      y += 5;
+      doc.setDrawColor(220);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 10;
+    }
+
+    if (tekst) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Beschrijving van de inspectie", margin, y);
+      y += 7;
+      doc.setFont("helvetica", "normal");
+      let tekstblokken = doc.splitTextToSize(tekst, pageWidth - 2 * margin);
+      doc.text(tekstblokken, margin, y);
+      y += tekstblokken.length * 6 + 5;
+    }
+
+    if (opmerkingen) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Opmerkingen", margin, y);
+      y += 7;
+      doc.setFont("helvetica", "normal");
+      let opText = doc.splitTextToSize(opmerkingen, pageWidth - 2 * margin);
+      doc.text(opText, margin, y);
+      y += opText.length * 6 + 5;
+    }
+
+    const savePdf = () => {
+      const naam = klant ? `Inspectie_{klant}.pdf` : "Inspectierapport.pdf";
+      doc.save(naam);
+    };
+
+    if (bestanden.length > 0) {
+      if (y > 180) {
+        doc.addPage();
+        y = margin;
+      } else {
+        y += 10;
+      }
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Fotobewijs", margin, y);
+      y += 10;
+
+      let imagesLoaded = 0;
+      for (let i = 0; i < bestanden.length; i++) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = function () {
+            const maxW = 80;
+            const maxH = 60;
+            const aspect = img.width / img.height;
+            let w = maxW;
+            let h = maxW / aspect;
+            if (h > maxH) {
+              h = maxH;
+              w = maxH * aspect;
+            }
+
+            const x = i % 2 === 0 ? margin : pageWidth / 2 + 5;
+            if (i % 2 === 0 && i !== 0) y += maxH + 10;
+
+            doc.addImage(img, "JPEG", x, y, w, h);
+            imagesLoaded++;
+            if (imagesLoaded === bestanden.length) {
+              savePdf();
+            }
+          };
+        };
+        reader.readAsDataURL(bestanden[i]);
+      }
+    } else {
+      savePdf();
+    }
+  };
+}
+
+function zoekOpGoogleMaps() {
+  const locatie = document.getElementById("locatie").value;
+  if (locatie) {
+    const url = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(locatie)}&zoom=14&size=600x400&markers=color:red%7Clabel:S%7C${encodeURIComponent(locatie)}&key=YOUR_GOOGLE_MAPS_API_KEY`;
+    document.getElementById("map-image").src = url;
+  } else {
+    alert("Voer een locatie in.");
+  }
+}
