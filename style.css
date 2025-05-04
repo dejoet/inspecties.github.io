@@ -1,56 +1,68 @@
+/* Algemeen */
 body {
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
-  margin: 0;
-  padding: 0;
+  font-family: "Times New Roman", serif;  /* Alle tekst in Times New Roman */
+  background: #f2f2f2;                    /* Lichtgrijze achtergrond voor de hele pagina */
+  margin: 0;                              /* Geen standaardmarge van de browser */
+  padding: 0;                             /* Geen standaard-padding van de browser */
 }
 
+/* Hoofdcontainer */
 .container {
-  background: white;
-  max-width: 700px;
-  margin: 40px auto;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: white;                      /* Witte achtergrond voor de formuliercontainer */
+  max-width: 700px;                       /* Max breedte om de inhoud netjes gecentreerd te houden */
+  margin: 40px auto;                      /* 40 px boven- en ondermarge, automatisch horizontaal centreren */
+  padding: 30px;                          /* Ruimte binnenin de container */
+  border-radius: 10px;                    /* Afgeronde hoeken */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);  /* Subtiele schaduw voor diepte-effect */
 }
 
+/* Titel */
 h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
+  text-align: center;                     /* Centrum uitlijning */
+  margin-bottom: 20px;                    /* Ruimte onder de titel */
+  color: #333;                            /* Donkergrijze tekstkleur voor goede leesbaarheid */
 }
 
+/* Labels */
 label {
-  margin-top: 15px;
-  font-weight: bold;
+  margin-top: 15px;                       /* Ruimte boven elk label, zodat ze niet dicht op elkaar staan */
+  font-weight: bold;                      /* Vetgedrukte labels om ze duidelijk te maken */
 }
 
-input, select, textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+/* Formulier-velden */
+input,
+select,
+textarea {
+  width: 100%;                            /* Vult de volledige breedte van de container */
+  padding: 10px;                          /* Interne ruimte voor een prettig klik-gebied */
+  margin-top: 5px;                        /* Iets ruimte boven elk veld */
+  border: 1px solid #ccc;                 /* Lichtgrijze rand rondom het veld */
+  border-radius: 5px;                     /* Iets afgeronde hoeken voor een zachte uitstraling */
+  font-family: "Times New Roman", serif;  /* Zorg dat ook gebruikersinvoer in Times New Roman staat */
 }
 
+/* Knoppen */
 button {
-  width: 48%;
-  padding: 12px;
-  margin-top: 20px;
-  font-weight: bold;
-  border: none;
-  background-color: #007BFF;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
+  width: 48%;                             /* Twee knoppen naast elkaar passen zo mooi */
+  padding: 12px;                          /* Voldoende klikruimte */
+  margin-top: 20px;                       /* Ruimte boven de knoppen */
+  font-weight: bold;                      /* Vetgedrukte tekst op de knop */
+  border: none;                           /* Geen standaard browserrand */
+  background-color: #007BFF;              /* Blauwe achtergrondkleur */
+  color: white;                           /* Witte tekstkleur */
+  border-radius: 5px;                     /* Afronding van knoppen */
+  cursor: pointer;                        /* Cursor verandert in handje bij hover */
+  font-family: "Times New Roman", serif;  /* Knoptekst ook in Times New Roman */
 }
 
+/* Knop-hover state */
 button:hover {
-  background-color: #0056b3;
+  background-color: #0056b3;              /* Donkerder blauw bij hover voor feedback */
 }
 
+/* Kaart afbeelding */
 #map-image {
-  margin-top: 20px;
-  max-width: 100%;
-  border: 1px solid #ccc;
+  margin-top: 20px;                       /* Ruimte boven de kaart */
+  max-width: 100%;                        /* Past zich aan containerbreedte aan */
+  border: 1px solid #ccc;                 /* Lichtgrijze rand rondom de kaart */
 }
