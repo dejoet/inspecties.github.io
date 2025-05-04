@@ -1,68 +1,128 @@
-/* Algemeen */
+/* Basis reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 body {
-  font-family: "Times New Roman", serif;  /* Alle tekst in Times New Roman */
-  background: #f2f2f2;                    /* Lichtgrijze achtergrond voor de hele pagina */
-  margin: 0;                              /* Geen standaardmarge van de browser */
-  padding: 0;                             /* Geen standaard-padding van de browser */
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #f5f5f5;
+  color: #333;
+  line-height: 1.5;
+}
+/* Header volledig wit, met P&V-logo op witte achtergrond */
+.pv-header {
+  background: #fff;           /* wit */
+  color: #870930;             /* standaard tekstkleur bordeaux */
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 2px solid #870930; /* optioneel: dunne bordeaux scheidingslijn */
 }
 
-/* Hoofdcontainer */
-.container {
-  background: white;                      /* Witte achtergrond voor de formuliercontainer */
-  max-width: 700px;                       /* Max breedte om de inhoud netjes gecentreerd te houden */
-  margin: 40px auto;                      /* 40 px boven- en ondermarge, automatisch horizontaal centreren */
-  padding: 30px;                          /* Ruimte binnenin de container */
-  border-radius: 10px;                    /* Afgeronde hoeken */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);  /* Subtiele schaduw voor diepte-effect */
+/* Logo blijft transparant/PNG, dus ligt nu op wit */
+.pv-logo {
+  height: 80px;
+  width: auto;
+  background: #fff;
 }
 
-/* Titel */
-h2 {
-  text-align: center;                     /* Centrum uitlijning */
-  margin-bottom: 20px;                    /* Ruimte onder de titel */
-  color: #333;                            /* Donkergrijze tekstkleur voor goede leesbaarheid */
+/* Titel in bordeaux */
+.pv-header h1 {
+  font-size: 1.5rem;
+  color: #870930;             /* P&V-bordeaux */
+  margin: 0;
 }
 
-/* Labels */
+
+/* Container */
+.pv-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Grid layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Form groups */
+.form-group,
+.form-group-full {
+  display: flex;
+  flex-direction: column;
+}
+.form-group-full {
+  grid-column: 1 / -1;
+}
 label {
-  margin-top: 15px;                       /* Ruimte boven elk label, zodat ze niet dicht op elkaar staan */
-  font-weight: bold;                      /* Vetgedrukte labels om ze duidelijk te maken */
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #444;
 }
-
-/* Formulier-velden */
-input,
+input[type="text"],
+input[type="date"],
 select,
-textarea {
-  width: 100%;                            /* Vult de volledige breedte van de container */
-  padding: 10px;                          /* Interne ruimte voor een prettig klik-gebied */
-  margin-top: 5px;                        /* Iets ruimte boven elk veld */
-  border: 1px solid #ccc;                 /* Lichtgrijze rand rondom het veld */
-  border-radius: 5px;                     /* Iets afgeronde hoeken voor een zachte uitstraling */
-  font-family: "Times New Roman", serif;  /* Zorg dat ook gebruikersinvoer in Times New Roman staat */
+textarea,
+input[type="file"] {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
 }
-
-/* Knoppen */
-button {
-  width: 48%;                             /* Twee knoppen naast elkaar passen zo mooi */
-  padding: 12px;                          /* Voldoende klikruimte */
-  margin-top: 20px;                       /* Ruimte boven de knoppen */
-  font-weight: bold;                      /* Vetgedrukte tekst op de knop */
-  border: none;                           /* Geen standaard browserrand */
-  background-color: #007BFF;              /* Blauwe achtergrondkleur */
-  color: white;                           /* Witte tekstkleur */
-  border-radius: 5px;                     /* Afronding van knoppen */
-  cursor: pointer;                        /* Cursor verandert in handje bij hover */
-  font-family: "Times New Roman", serif;  /* Knoptekst ook in Times New Roman */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #004b86; /* P&V donkerblauw */
 }
-
-/* Knop-hover state */
-button:hover {
-  background-color: #0056b3;              /* Donkerder blauw bij hover voor feedback */
+.map-input {
+  display: flex;
+  gap: 0.5rem;
 }
-
-/* Kaart afbeelding */
+.map-input input {
+  flex: 1;
+}
+.map-input button {
+  background: #004b86;
+  color: white;
+  border: none;
+  padding: 0 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.map-input button:hover {
+  background: #003760;
+}
 #map-image {
-  margin-top: 20px;                       /* Ruimte boven de kaart */
-  max-width: 100%;                        /* Past zich aan containerbreedte aan */
-  border: 1px solid #ccc;                 /* Lichtgrijze rand rondom de kaart */
+  display: block;
+  margin-top: 1rem;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Actieknoppen */
+.actions {
+  margin-top: 2rem;
+  text-align: right;
+}
+.actions button {
+  background: #870930;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.actions button:hover {
+  background: #6c0726;
 }

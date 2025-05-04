@@ -2,91 +2,105 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inspectierapport</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inspectierapport – P&V Group</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="container">
-    <h2>Inspectierapport</h2>
+  <header class="pv-header">
+    <img src="pv-logo.png" alt="P&V Group logo" class="pv-logo"/>
+    <h1>Inspectierapport</h1>
+  </header>
 
-    <label for="maatschappij">maatschappij:</label>
-    <input type="text" id="maatschappij" />
+  <main class="pv-container">
+    <form id="inspectie-form">
+      <div class="grid">
+        <div class="form-group">
+          <label for="maatschappij">Maatschappij</label>
+          <input type="text" id="maatschappij" required/>
+        </div>
+        <div class="form-group">
+          <label for="zetel">Zetel</label>
+          <input type="text" id="zetel" required/>
+        </div>
+        <div class="form-group">
+          <label for="beheerder">Beheerder</label>
+          <input type="text" id="beheerder" required/>
+        </div>
+        <div class="form-group">
+          <label for="polisnummer">Polisnummer</label>
+          <input type="text" id="polisnummer" required/>
+        </div>
+        <div class="form-group">
+          <label for="verzekerde">Verzekerde</label>
+          <input type="date" id="verzekerde" required/>
+        </div>
+        <div class="form-group">
+          <label for="liggingrisico">Ligging risico</label>
+          <input type="text" id="liggingrisico"/>
+        </div>
+        <div class="form-group">
+          <label for="producent">Producent</label>
+          <input type="text" id="producent"/>
+        </div>
+        <div class="form-group">
+          <label for="datumbezoek">Datum bezoek</label>
+          <input type="date" id="datumbezoek"/>
+        </div>
+        <div class="form-group">
+          <label for="datumrapport">Datum rapport</label>
+          <input type="date" id="datumrapport"/>
+        </div>
+        <div class="form-group">
+          <label for="keuze1">Aanwezig</label>
+          <select id="keuze1">
+            <option value="">-- Kies --</option>
+            <option>Producent</option>
+            <option>Verzekerde</option>
+            <option>Andere</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="keuze2">Type risico</label>
+          <select id="keuze2">
+            <option value="">-- Kies --</option>
+            <option>Woonhuis</option>
+            <option>Opslagplaats</option>
+            <option>Werkplaats</option>
+            <option>Handelshuis</option>
+            <option>Landbouw</option>
+            <option>Kantoor</option>
+            <option>Andere</option>
+          </select>
+        </div>
+        <div class="form-group-full">
+          <label for="tekstveld">Beschrijving</label>
+          <textarea id="tekstveld" rows="4"></textarea>
+        </div>
+        <div class="form-group-full">
+          <label for="tekst1">Opmerkingen</label>
+          <textarea id="tekst1" rows="3"></textarea>
+        </div>
+        <div class="form-group-full">
+          <label for="afbeeldingen">Voeg foto's toe</label>
+          <input type="file" id="afbeeldingen" accept="image/*" multiple/>
+        </div>
+        <div class="form-group-full">
+          <label for="locatie">Google Maps-locatie</label>
+          <div class="map-input">
+            <input type="text" id="locatie" placeholder="Straat, stad"/>
+            <button type="button" onclick="zoekOpGoogleMaps()">Toon kaart</button>
+          </div>
+          <img id="map-image" alt="Kaartweergave"/>
+        </div>
+      </div>
 
-    <label for="zetel">zetel:</label>
-    <input type="text" id="zetel" />
-
-    <label for="beheerder">beheerder:</label>
-    <input type="text" id="beheerder" />
-
-    <label for="polisnummer">polisnummer:</label>
-    <input type="text" id="polisnummer" />
-
-    <label for="verzekerde">verzekerde:</label>
-    <input type="date" id="verzekerde" />
-
-    <label for="liggingrisico">ligging risico:</label>
-    <input type="text" id="liggingrisico" />
-
-    <label for="producent">producent:</label>
-    <input type="text" id="producent" />
-
-    <label for="datumbezoek">datum bezoek:</label>
-    <input type="text" id="datumbezoek" />
-
-    <label for="datumrapport">datum rapport:</label>
-    <input type="date" id="datumrapport" />
-
-    <label for="keuze1">Aanwezig</label>
-    <select id="keuze1">
-      <option value="">-- Kies --</option>
-      <option>producent</option>
-      <option>Verzekerde</option>
-      <option>Andere</option>
-    </select>
-
-    <label for="keuze2">Type risico:</label>
-    <select id="keuze2">
-      <option value="">-- Kies --</option>
-      <option>Woonhuis</option>
-      <option>Opslagplaats</option>
-      <option>Werkplaats</option>
-      <option>Handelshuis</option>
-      <option>Handelshuis met Opslagplaats</option>
-      <option>Handelshuis met werkplaats</option>
-      <option>Werkplaats met showroom</option>
-      <option>Landbouw</option>
-      <option>Bedrijvencentrum</option>
-      <option>Kantoor</option>
-      <option>Complex van buildings en handelszaken</option>
-      <option>Controle-inspectie</option>
-      <option>Andere</option>
-    </select>
-
-    <label for="tekstveld">Beschrijving:</label>
-    <textarea id="tekstveld" rows="4"></textarea>
-
-    <label for="tekst1">Opmerkingen:</label>
-    <textarea id="tekst1" rows="3"></textarea>
-
-    <label for="afbeeldingen">Voeg foto's toe:</label>
-    <input type="file" id="afbeeldingen" accept="image/*" multiple />
-
-    <label for="locatie">Google Maps-locatie:</label>
-    <input type="text" id="locatie" placeholder="Straat, stad" />
-    <img id="map-image" alt="Kaartweergave" />
-
-    <button onclick="genereerPDF()">Genereer PDF</button>
-    <button onclick="zoekOpGoogleMaps()">Toon kaart</button>
-  </div>
-<!-- jsPDF uit head mag blijven staan of hierheen verplaatst worden -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- jouw eigen code -->
-<script src="script.js"></script>
-
-
-<script defer src="script.js"></script>
-
+      <div class="actions">
+        <button type="button" onclick="genereerPDF()">Genereer PDF</button>
+      </div>
+    </form>
+  </main>
 </body>
 </html>
