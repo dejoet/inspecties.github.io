@@ -1,42 +1,139 @@
-/* Basis reset */
+/* ─── BASIS RESET ──────────────────────────────────────────────────── */
+/*
+  Hiermee zorg je dat alle elementen in alle browsers dezelfde box-sizing,
+  margin en padding toepassen. Dit voorkomt onverwachte verschillen.
+*/
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
+
+/*
+  Basiseigenschappen voor de body:
+  - Lettertype: modern en webveilig
+  - Achtergrond: lichtgrijs voor een rustige uitstraling
+  - Tekstkleur: donkergrijs voor goede leesbaarheid
+  - Regelhoogte: voldoende ruimte tussen regels
+*/
 body {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   background: #f5f5f5;
   color: #333;
   line-height: 1.5;
 }
-/* Header volledig wit, met P&V-logo op witte achtergrond */
+
+/* ─── HEADER ──────────────────────────────────────────────────────────── */
+/*
+  De header is wit om contrast te bieden met de achtergrond,
+  met een bordeaux onderrand die de P&V-identiteit benadrukt.
+  Flexbox maakt het eenvoudig om logo en titel uit te lijnen.
+*/
 .pv-header {
   background: #fff;           /* wit */
-  color: #870930;             /* standaard tekstkleur bordeaux */
-  padding: 1rem 2rem;
+  color: #870930;             /* P&V-bordeaux */
+  padding: 1rem 2rem;         /* verticale en horizontale spacing */
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  border-bottom: 2px solid #870930; /* optioneel: dunne bordeaux scheidingslijn */
+  align-items: center;        /* verticaal centreren */
+  gap: 1rem;                  /* ruimte tussen logo en tekst */
+  border-bottom: 2px solid #870930;
 }
 
-/* Logo blijft transparant/PNG, dus ligt nu op wit */
+/*
+  Logo-styling:
+  Het logo behoudt zijn verhouding (auto width) en staat op een witte achtergrond
+  zodat eventuele transparantie goed zichtbaar blijft.
+*/
 .pv-logo {
   height: 80px;
   width: auto;
   background: #fff;
 }
 
-/* Titel in bordeaux */
+/*
+  Titel in de header:
+  - Grootte passend bij de merkstijl
+  - Kleur in bordeaux voor consistentie
+  - Geen extra margin om uitlijning te behouden
+*/
 .pv-header h1 {
   font-size: 1.5rem;
-  color: #870930;             /* P&V-bordeaux */
+  color: #870930;
   margin: 0;
 }
 
+/* ─── DIEFSTAL-SECTIE ─────────────────────────────────────────────────── */
+/*
+  Deze sectie bevat alle velden voor diefstalgegevens.
+  Een lichtgrijze achtergrond en subtiele schaduw
+  onderscheiden deze sectie van de rest.
+*/
+.section-container {
+  grid-column: 1 / -1;        /* beslaat alle kolommen in de grid */
+  margin-top: 2rem;           /* ruimte van vorige sectie */
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
 
-/* Container */
+/*
+  Subsecties binnen de diefstalsectie:
+  - Fieldset met lichte rand en afgeronde hoeken
+  - Padding voor interne spacing
+  - Margin onderaan voor afstand tussen fieldsets
+*/
+.diefstal-fieldset {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/*
+  Legend (titel) van de fieldset:
+  - Vetgedrukt voor duidelijk onderscheid
+  - Padding horizontaal om de tekst los te maken van de rand
+*/
+.diefstal-fieldset legend {
+  font-weight: 600;
+  padding: 0 0.5rem;
+  color: #333;
+}
+
+/*
+  Formulierrijen:
+  - Grid met tot 2 kolommen (min 250px breed)
+  - Gap voor spacing tussen kolommen
+*/
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/*
+  Form-group:
+  - Flex-kolom zodat label boven input staat
+  - .full-width breidt uit over alle kolommen
+*/
+.form-group,
+.full-width {
+  display: flex;
+  flex-direction: column;
+}
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* ─── ALGEMENE LAYOUT ──────────────────────────────────────────────────── */
+/*
+  Centraal containerelement:
+  - Max-breedte om regellengte beheersbaar te houden
+  - Center uitlijning en witte achtergrond
+  - Schaduw en afgeronde hoeken voor card-look
+*/
 .pv-container {
   max-width: 900px;
   margin: 2rem auto;
@@ -46,21 +143,25 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* Grid layout */
+/*
+  Grid voor secties bovenaan:
+  - Flexibele kolommen
+  - Gap voor interne spacing
+*/
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }
 
-/* Form groups */
-.form-group,
-.form-group-full {
+/*
+  Label en formuliervelden:
+  - Labels vetgedrukt en met spacing
+  - Invoervelden met padding, border-radius en consistent font-size
+*/
+.form-group {
   display: flex;
   flex-direction: column;
-}
-.form-group-full {
-  grid-column: 1 / -1;
 }
 label {
   margin-bottom: 0.5rem;
@@ -77,12 +178,25 @@ input[type="file"] {
   border-radius: 4px;
   font-size: 0.9rem;
 }
+
+/*
+  Focus-stijl voor toegankelijke UX:
+  - Verwijder default outline
+  - Bied duidelijke visuele indicatie met accentkleur
+*/
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #004b86; /* P&V donkerblauw */
+  border-color: #004b86;
 }
+
+/* ─── GOOGLE MAPS INVOER ────────────────────────────────────────────────── */
+/*
+  Combineert een tekstveld met een button:
+  - .map-input flex voor zij-aan-zij weergave
+  - Button met P&V-donkerblauw en hover-effect
+*/
 .map-input {
   display: flex;
   gap: 0.5rem;
@@ -109,7 +223,12 @@ textarea:focus {
   border-radius: 4px;
 }
 
-/* Actieknoppen */
+/* ─── ACTIEKNOPPEN ─────────────────────────────────────────────────────── */
+/*
+  Submit of PDF-knop:
+  - Rechts uitgelijnd via .actions
+  - Button in bordeaux met padding en hover
+*/
 .actions {
   margin-top: 2rem;
   text-align: right;
@@ -126,3 +245,39 @@ textarea:focus {
 .actions button:hover {
   background: #6c0726;
 }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
+/*
+  Maak het ontwerp mobielvriendelijk:
+  - Container smaller en center op tablet
+  - Grid wordt één kolom
+  - Header en knoppen gecentreerd
+*/
+@media (max-width: 1024px) {
+  .pv-container {
+    max-width: 90%;
+    margin: 1rem auto;
+    padding: 1rem;
+  }
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+  }
+  .pv-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+  .pv-logo {
+    margin-bottom: 0.5rem;
+  }
+  .form-group,
+  .full-width {
+    width: 100%;
+  }
+  .actions {
+    text-align: center;
+  }
+}
+
+/* Einde van het volledige script met gedetailleerde uitleg */
