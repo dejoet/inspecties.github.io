@@ -1,3 +1,48 @@
+// script.js
+// Integreert clausule-selector met bestaande PDF-generator
+
+// jsPDF import
+const { jsPDF } = window.jspdf;
+
+// Definieer je clausules hier
+const clauses = [
+  { id: 1, title: 'Preventiemaatregel – Vuurvergunning', content: 'De procedure “Vuurvergunning“ moet toegepast worden volgens KB 28/03/2014.' },
+  { id: 2, title: 'Preventiemaatregel – Blusmiddelen', content: 'Blustoestellen NR 01577 op strategische posities, jaarlijks onderhouden.' },
+  // ... voeg hier extra clausules toe ...
+];
+
+// Render het keuzemenu voor clausules
+function renderClauses() {
+  const container = document.getElementById('clausesContainer');
+  container.innerHTML = '';
+  clauses.forEach(clause => {
+    const div = document.createElement('div');
+    div.className = 'clause';
+    div.innerHTML = `
+      <div class="clause-header">
+        <input type="checkbox" id="chk-${clause.id}" />
+        <label for="chk-${clause.id}" class="clause-title">${clause.title}</label>
+      </div>
+      <div id="details-${clause.id}" class="clause-details" style="display:none; margin: 8px 0 16px 24px;">
+        <label>Prioriteit:</label>
+        <select id="priority-${clause.id}"><option>Hoog</option><option>Middel</option><option>Laag</option></select>
+        <label style="margin-left:16px;">Termijn:</label>
+        <input type="date" id="deadline-${clause.id}" />
+        <label style="display:block; margin-top:8px;">Opmerking(en):</label>
+        <textarea id="comment-${clause.id}" rows="2" style="width:100%;"></textarea>
+      </div>
+    `;
+    container.appendChild(div);
+    document.getElementById(`chk-${clause.id}`).addEventListener('change', e => {
+      document.getElementById(`details-${clause.id}`).style.display = e.target.checked ? 'block' : 'none';
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderClauses();
+});
+
 // Origineel script uitgebreid met oranje lijnen onder elke sectietitel, paginering en fotobewijs op nieuwe pagina
 function genereerPDF() {
   const { jsPDF } = window.jspdf;
@@ -145,13 +190,45 @@ function genereerPDF() {
       });
     });
 
+    const anyChecked = clauses.some(c => document.getElementById(`chk-${c.id}`).checked);
+if (anyChecked) {
+  drawTitle('Geselecteerde Clausules');
+  clauses.forEach(clause => {
+    if (!document.getElementById(`chk-${clause.id}`).checked) return;
+    // Titel
+    doc.setFont('Times New Roman','italic').setFontSize(12);
+    ensureSpace(10);
+    doc.text(clause.title, margin, y);
+    y += 8;
+    // Prioriteit + termijn
+    const pr = document.getElementById(`priority-${clause.id}`).value;
+    const dt = document.getElementById(`deadline-${clause.id}`).value || '-';
+    doc.setFont('Times New Roman','bold').setFontSize(11).text('Prioriteit:', margin, y);
+    doc.setFont('Times New Roman','normal').text(pr, margin + 40, y); y += 6;
+    doc.setFont('Times New Roman','bold').text('Termijn:', margin, y);
+    doc.setFont('Times New Roman','normal').text(dt, margin + 40, y); y += 8;
+    // Inhoud
+    doc.setFont('Times New Roman','normal').setFontSize(11);
+    const contentLines = doc.splitTextToSize(clause.content, pageWidth - 2 * margin);
+    contentLines.forEach(line => { ensureSpace(6); doc.text(line, margin, y); y += 6; });
+    // Opmerkingen
+    const cm = document.getElementById(`comment-${clause.id}`).value.trim();
+    if (cm) {
+      drawTitle('Opmerking(en)');
+      const cmLines = doc.splitTextToSize(cm, pageWidth - 2 * margin);
+      cmLines.forEach(l => { ensureSpace(6); doc.text(l, margin, y); y += 6; });
+    }
+    y += 8;
+  });
+}
+    
     // FOTOBEWIJS altijd nieuwe pagina
     const files = Array.from(document.getElementById('afbeeldingen').files);
     if (files.length) {
       doc.addPage();
       y = margin;
       drawTitle("Fotobewijs");
-      const maxW = 80, maxH = 60, gapX = 10, gapY = 10;
+      const maxW = 80, maxH = 60, gapX = 1, gapY = 1;
       let col = 0;
       files.forEach((file, i) => {
         const reader = new FileReader();
@@ -176,6 +253,7 @@ function genereerPDF() {
   };
 }
 
+
 // Google Maps knop
 function zoekOpGoogleMaps() {
   const loc = document.getElementById("locatie").value.trim();
@@ -183,7 +261,7 @@ function zoekOpGoogleMaps() {
     alert("Voer een locatie in.");
     return;
   }
-  const key = "YOUR_GOOGLE_MAPS_API_KEY";
-  const url = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(loc)}&zoom=14&size=600x400&markers=color:red%7Clabel:S%7C${encodeURIComponent(loc)}&key=${key}`;
+  const key = "AIzaSyA1uZJGvM7-gPJ5dB0e9l_4dV5EIBPYXUE";
+  const url = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(loc)}&zoom=14&size=600x400&markers=color:red%7Clabel:S%7C${encodeURIComponent(loc)}&key=${AIzaSyA1uZJGvM7-gPJ5dB0e9l_4dV5EIBPYXUE}`;
   document.getElementById("map-image").src = url;
 }

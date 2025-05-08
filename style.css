@@ -281,3 +281,45 @@ textarea:focus {
 }
 
 /* Einde van het volledige script met gedetailleerde uitleg */
+
+/* ——— Clausule-generator styles ——— */
+.clause {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  background: #fff;
+  font-style: italic;
+  font-family: 'Times New Roman', serif;
+}
+.clause-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.clause-title {
+  flex: 1 1 auto;
+  margin-left: 8px;
+  font-size: 18px;
+  text-decoration: underline;
+  font-weight: bold;
+}
+.clause-content {
+  margin-top: 10px;
+}
+/* Labels, inputs, buttons */
+.clause-content label { font-weight: bold; font-style: italic; margin-top:8px; }
+.clause-content select,
+.clause-content input,
+.clause-content textarea {
+  width: 100%; padding: 8px; box-sizing: border-box;
+  font-family: 'Times New Roman', serif; font-style: italic;
+}
+/* Responsive tweaks (tablet/mobile) */
+@media (max-width: 767px) {
+  .clause-title { font-size: 16px; }
+  .clause-content select,
+  .clause-content input,
+  .clause-content textarea { font-size: 14px; }
+}
