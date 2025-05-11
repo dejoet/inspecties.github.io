@@ -6,7 +6,9 @@
   <title>Inspectierapport – P&amp;V Group</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="clauses.js" defer></script>
   <script src="script.js" defer></script>
+  
 </head>
 <body>
   <header class="pv-header">
@@ -511,6 +513,7 @@
         <input type="text" id="locatie" placeholder="Straat, stad"/>
         <button type="button" onclick="zoekOpGoogleMaps()">Toon kaart</button>
       </div>
+
 
       <div class="actions">
         <button type="button" onclick="genereerPDF()">Genereer PDF</button>

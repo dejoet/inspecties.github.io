@@ -1,47 +1,16 @@
 // script.js
-// Integreert clausule-selector met bestaande PDF-generator
 
-// jsPDF import
+// jsPDF import is via <script src="…jspdf.umd.min.js">
 const { jsPDF } = window.jspdf;
 
-// Definieer je clausules hier
-const clauses = [
-  { id: 1, title: 'Preventiemaatregel – Vuurvergunning', content: 'De procedure “Vuurvergunning“ moet toegepast worden volgens KB 28/03/2014.' },
-  { id: 2, title: 'Preventiemaatregel – Blusmiddelen', content: 'Blustoestellen NR 01577 op strategische posities, jaarlijks onderhouden.' },
-  // ... voeg hier extra clausules toe ...
-];
-
-// Render het keuzemenu voor clausules
-function renderClauses() {
-  const container = document.getElementById('clausesContainer');
-  container.innerHTML = '';
-  clauses.forEach(clause => {
-    const div = document.createElement('div');
-    div.className = 'clause';
-    div.innerHTML = `
-      <div class="clause-header">
-        <input type="checkbox" id="chk-${clause.id}" />
-        <label for="chk-${clause.id}" class="clause-title">${clause.title}</label>
-      </div>
-      <div id="details-${clause.id}" class="clause-details" style="display:none; margin: 8px 0 16px 24px;">
-        <label>Prioriteit:</label>
-        <select id="priority-${clause.id}"><option>Hoog</option><option>Middel</option><option>Laag</option></select>
-        <label style="margin-left:16px;">Termijn:</label>
-        <input type="date" id="deadline-${clause.id}" />
-        <label style="display:block; margin-top:8px;">Opmerking(en):</label>
-        <textarea id="comment-${clause.id}" rows="2" style="width:100%;"></textarea>
-      </div>
-    `;
-    container.appendChild(div);
-    document.getElementById(`chk-${clause.id}`).addEventListener('change', e => {
-      document.getElementById(`details-${clause.id}`).style.display = e.target.checked ? 'block' : 'none';
-    });
-  });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
+  // roep nu gewoon de functie aan die in clauses.js op window staat
   renderClauses();
+
+  // als je de inline onclick wilt vervangen door een event listener:
+  // document.getElementById('btnGenereer').addEventListener('click', genereerPDF);
 });
+
 
 // Origineel script uitgebreid met oranje lijnen onder elke sectietitel, paginering en fotobewijs op nieuwe pagina
 function genereerPDF() {
@@ -191,35 +160,185 @@ function genereerPDF() {
     });
 
     const anyChecked = clauses.some(c => document.getElementById(`chk-${c.id}`).checked);
-if (anyChecked) {
-  drawTitle('Geselecteerde Clausules');
-  clauses.forEach(clause => {
-    if (!document.getElementById(`chk-${clause.id}`).checked) return;
-    // Titel
-    doc.setFont('Times New Roman','italic').setFontSize(12);
-    ensureSpace(10);
-    doc.text(clause.title, margin, y);
-    y += 8;
-    // Prioriteit + termijn
-    const pr = document.getElementById(`priority-${clause.id}`).value;
-    const dt = document.getElementById(`deadline-${clause.id}`).value || '-';
-    doc.setFont('Times New Roman','bold').setFontSize(11).text('Prioriteit:', margin, y);
-    doc.setFont('Times New Roman','normal').text(pr, margin + 40, y); y += 6;
-    doc.setFont('Times New Roman','bold').text('Termijn:', margin, y);
-    doc.setFont('Times New Roman','normal').text(dt, margin + 40, y); y += 8;
-    // Inhoud
-    doc.setFont('Times New Roman','normal').setFontSize(11);
+    if (anyChecked) {
+      // ─── nieuwe pagina forceren ───
+      doc.addPage();
+      y = margin;
+
+      // vóór dit stukje: zorg dat je genoeg ruimte hebt
+
+ensureSpace(18);
+
+// hoogte van het kader
+const boxH = 12;
+
+// teken alleen de rand (D = draw-only), geen fill
+doc.setDrawColor(0);
+doc.rect(
+  margin, y,
+  pageWidth - 2 * margin, boxH,
+  'D'
+);
+
+// zet de font en kleur
+doc.setFont("Times New Roman", "bold")
+   .setFontSize(12)
+   .setTextColor(0);
+
+// teken “Preventie” links, verticaal gecentreerd
+doc.text(
+  "Preventie",
+  margin + 3,         // kleine marge van 3 mm vanaf de linkerrand
+  y + boxH / 2,       // midden van de box
+  { baseline: "middle", align: "left" }
+);
+
+// schuif de y-waarde op onder dit kader
+y += boxH + 8;
+ 
+    
+      // ─── intro-tekst vóór de clausules ───
+      doc.setFont("Times New Roman", "italic").setFontSize(12);
+      doc.text(
+        "Clausule – Prioriteitsbepaling van de preventiemaatregel(s)    NR 1576",
+        margin,
+        y
+      );
+      y += 8;
+    
+      doc.setFont("Times New Roman", "italic").setFontSize(10);
+      const bullets = [
+        "A: Noodzakelijk uit te voeren alvorens te kunnen accepteren,",
+        "B: Uit te voeren uiterlijk tegen aangeduide datum,",
+        "C: Wenselijke preventiemaatregelen, echter niet verplichtend,",
+        "D: Reeds (grotendeels) aanwezig, doch dient integraal bestendigd te worden."
+      ];
+      bullets.forEach(line => {
+        ensureSpace(6);
+        doc.text(line, margin + 4, y);
+        y += 6;
+      });
+      y += 4; // wat extra ruimte
+    
+      const agreementText =
+        "Er is tussen de partijen uitdrukkelijk overeengekomen dat bij niet-uitvoering van de hierna vermelde " +
+        "en gespecificeerde verplichtingen binnen de opgegeven termijn, de Verzekeringsnemer geen recht heeft op " +
+        "enige verzekeringsprestatie wanneer er een oorzakelijk verband bestaat tussen de niet-uitvoering van een of " +
+        "meerdere verplichtingen en het overkomen van een schadegeval. De maatschappij behoudt bovendien het recht om " +
+        "de polis wegens niet- of gedeeltelijke uitvoering van de opgelegde preventiemaatregelen op te zeggen, dit met " +
+        "in acht name van een vooropzeg van 30 (dertig) dagen.";
+      const agreementLines = doc.splitTextToSize(agreementText, pageWidth - 2 * margin);
+      agreementLines.forEach(line => {
+        ensureSpace(6);
+        doc.text(line, margin, y);
+        y += 6;
+      });
+
+      // 3) Wit scheidingslijntje
+      y += 4;                                 // wat extra ruimte
+      doc.setDrawColor(255, 255, 255);       // wit
+      doc.setLineWidth(0.5);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 8;                                 // ruimte voor de volgende titel
+
+
+
+// Loop door alle geselecteerde clausules en genereer PDF-content
+clauses.forEach(clause => {
+  // 1. Controleer of de checkbox voor deze clausule is aangevinkt
+  if (!document.getElementById(`chk-${clause.id}`).checked) return;
+
+  // 2. Titel instellen (cursief, 12pt)
+  doc.setFont('Times New Roman', 'italic').setFontSize(12);
+  ensureSpace(10);                              // Zorg voor verticale ruimte indien nodig
+  doc.text(clause.title, margin, y);           // Schrijf de titel op positie (margin, y)
+
+  // 3. Lijn direct onder de titel tekenen
+  const titleBaseline = y;                      // Bewaar y-positie van de titeltekst
+  const lineY = titleBaseline + 2;             // Offset van 2pt onder de tekst
+  const startX = margin;
+  const endX = doc.internal.pageSize.getWidth() - margin;
+  doc.setDrawColor(0);                         // Zwarte kleur
+  doc.setLineWidth(0.5);                       // Lijndikte 0.5pt
+  doc.line(startX, lineY, endX, lineY);        // Teken de lijn
+
+  // 4. Verplaats y naar de start van de body
+  y = lineY + 6;                               // 6pt ruimte erna
+
+  // 5. Prioriteit en termijn ophalen en tekenen
+  const pr = document.getElementById(`priority-${clause.id}`).value;
+  const dt = document.getElementById(`deadline-${clause.id}`).value || '-';
+  // Label 'Prioriteit:' in bold-italic 11pt
+  doc.setFont('Times New Roman', 'bolditalic').setFontSize(11)
+     .text('Prioriteit:', margin, y);
+  // Waarde in italic
+  doc.setFont('Times New Roman', 'italic')
+     .text(pr, margin + 40, y);
+  y += 6;
+
+  // Label 'Termijn:'
+  doc.setFont('Times New Roman', 'bolditalic')
+     .text('Termijn:', margin, y);
+  doc.setFont('Times New Roman', 'italic')
+     .text(dt, margin + 40, y);
+  y += 8;
+
+  // 6. Inhoud of vrije tekst / invulvelden voor clausule 30 en 31
+  doc.setFont('Times New Roman', 'italic').setFontSize(11);
+  if (clause.id === 30) {
+    // Lees defect-velden uit inputs voor clause 30
+    const d1 = document.getElementById('defect-1').value || '...';
+    const d2 = document.getElementById('defect-2').value || '...';
+    const d3 = document.getElementById('defect-3').value || '...';
+    ensureSpace(6);
+    doc.text('- Volgende vastgestelde gebreken aan gebouwen, afwerkingen en/of technische installaties dienen uitgevoerd te worden :', margin, y);
+    y += 6;
+    [d1, d2, d3].forEach(def => {
+      ensureSpace(6);
+      doc.text(`  o ${def}`, margin, y);
+      y += 6;
+    });
+  } else if (clause.id === 31) {
+    // Lees vrije tekst uit textarea #free-text-31
+    const freeText31 = document.getElementById('free-text-31').value || '';
+    const lines31 = doc.splitTextToSize(freeText31, pageWidth - 2 * margin);
+    lines31.forEach(line => {
+      ensureSpace(6);
+      doc.text(line, margin, y);
+      y += 6;
+    });
+  } else {
+    // Standaard clausule-content
     const contentLines = doc.splitTextToSize(clause.content, pageWidth - 2 * margin);
-    contentLines.forEach(line => { ensureSpace(6); doc.text(line, margin, y); y += 6; });
-    // Opmerkingen
-    const cm = document.getElementById(`comment-${clause.id}`).value.trim();
-    if (cm) {
-      drawTitle('Opmerking(en)');
-      const cmLines = doc.splitTextToSize(cm, pageWidth - 2 * margin);
-      cmLines.forEach(l => { ensureSpace(6); doc.text(l, margin, y); y += 6; });
-    }
+    contentLines.forEach(line => {
+      ensureSpace(6);
+      doc.text(line, margin, y);
+      y += 6;
+    });
+  }
+
+  // 7. Opmerkingen (indien aanwezig)
+  const cm = document.getElementById(`comment-${clause.id}`).value.trim();
+  if (cm) {
+    ensureSpace(10);
+    // Titel 'Opmerking(en)' in bold-italic
+    doc.setFont('Times New Roman', 'bolditalic')
+       .text('Opmerking(en)', margin, y);
+    y += 4;
+    doc.setDrawColor(0);
     y += 8;
-  });
+    // Tekst van de opmerking
+    const cmLines = doc.splitTextToSize(cm, pageWidth - 2 * margin);
+    cmLines.forEach(l => {
+      ensureSpace(6);
+      doc.text(l, margin, y);
+      y += 6;
+    });
+  }
+
+  // 8. Ruimte voor de volgende clausule
+  y += 8;
+});
 }
     
     // FOTOBEWIJS altijd nieuwe pagina

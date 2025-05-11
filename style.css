@@ -283,43 +283,61 @@ textarea:focus {
 /* Einde van het volledige script met gedetailleerde uitleg */
 
 /* ——— Clausule-generator styles ——— */
+/* ——— Clausule-generator styles ——— */
 .clause {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  background: #fff;
-  font-style: italic;
-  font-family: 'Times New Roman', serif;
+  border: 1px solid #ccc;                      /* lichtgrijze rand rondom elke clausule */
+  padding: 10px;                               /* 10px binnenruimte aan alle kanten */
+  margin-bottom: 20px;                         /* 20px ruimte onder elke clausule */
+  border-radius: 5px;                          /* afgeronde hoeken (5px) */
+  background: #fff;                            /* witte achtergrond */
+  font-family: 'Times New Roman', serif;       /* klassieke serif-lettertype */
+  font-style: italic;                          /* cursieve tekst voor de hele .clause */
 }
+
+/* Header en titel */
 .clause-header {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  display: flex;                               /* flexbox lay-out om items naast elkaar te plaatsen */
+  align-items: center;                         /* verticale uitlijning van de checkbox en titel */
+  flex-wrap: wrap;                             /* mogen naar nieuwe regel bij weinig ruimte */
+  gap: 10px;                                   /* 10px ruimte tussen de flex-items */
 }
 .clause-title {
-  flex: 1 1 auto;
-  margin-left: 8px;
-  font-size: 18px;
-  text-decoration: underline;
-  font-weight: bold;
+  flex: 1 1 auto;                              /* neemt alle overgebleven ruimte in beslag */
+  margin-left: 8px;                            /* ruimte links van de titel tov checkbox */
+  font-size: 18px;                             /* wat grotere titeltekst */
+  text-decoration: underline;                  /* onderstreepte titel */
+  /* font-weight kun je weglaten als je ook cursief vet wil; voeg anders hier toe */
 }
-.clause-content {
-  margin-top: 10px;
-}
-/* Labels, inputs, buttons */
-.clause-content label { font-weight: bold; font-style: italic; margin-top:8px; }
+
+/* Content (labels, selects, inputs, textarea) */
+.clause-content label,
 .clause-content select,
 .clause-content input,
 .clause-content textarea {
-  width: 100%; padding: 8px; box-sizing: border-box;
-  font-family: 'Times New Roman', serif; font-style: italic;
+  font-family: inherit;                        /* overnemen van .clause (Times New Roman cursief) */
+  font-style: inherit;                         /* cursief */
 }
+
+.clause-content label {
+  font-weight: bold;                           /* vette labels */
+  margin-top: 8px;                             /* 8px ruimte boven elk label */
+}
+
+/* Form-elementen volledig breed en klik-vriendelijk */
+.clause-content select,
+.clause-content input,
+.clause-content textarea {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
 /* Responsive tweaks (tablet/mobile) */
 @media (max-width: 767px) {
-  .clause-title { font-size: 16px; }
+  .clause-title { font-size: 16px; }           /* iets kleinere titels op smalle schermen */
   .clause-content select,
   .clause-content input,
-  .clause-content textarea { font-size: 14px; }
+  .clause-content textarea {
+    font-size: 14px;                           /* iets kleinere tekst in form-elementen */
+  }
 }
