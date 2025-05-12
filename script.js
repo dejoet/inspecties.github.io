@@ -1,97 +1,281 @@
 // script.js
 
-// jsPDF import is via <script src="…jspdf.umd.min.js">
+// Importeer jsPDF. Deze regel gaat ervan uit dat jsPDF via een <script> tag in de HTML is geladen.
+// Voorbeeld: <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 const { jsPDF } = window.jspdf;
 
+/**
+ * Wacht tot de volledige HTML-structuur geladen is voordat JavaScript-code wordt uitgevoerd.
+ */
 document.addEventListener('DOMContentLoaded', () => {
-  // roep nu gewoon de functie aan die in clauses.js op window staat
-  renderClauses();
+  // Roep de functie 'renderClauses' aan. Deze functie wordt verwacht
+  // gedefinieerd te zijn in een ander bestand (bijv. clauses.js) en
+  // beschikbaar te zijn op het 'window' object.
+  // Deze functie is waarschijnlijk verantwoordelijk voor het dynamisch
+  // genereren van HTML-elementen voor de clausules op de webpagina.
+  if (typeof renderClauses === 'function') {
+    renderClauses();
+  } else {
+    console.warn('De functie renderClauses is niet gevonden. Zorg ervoor dat clauses.js correct geladen is.');
+  }
 
-  // als je de inline onclick wilt vervangen door een event listener:
-  // document.getElementById('btnGenereer').addEventListener('click', genereerPDF);
+  // Optioneel: Koppel de 'genereerPDF' functie aan de klik-gebeurtenis van een knop.
+  // Dit is een alternatief voor een inline 'onclick' attribuut in de HTML.
+  // Voorbeeld HTML: <button id="btnGenereer">Genereer PDF</button>
+  const btnGenereer = document.getElementById('btnGenereer');
+  if (btnGenereer) {
+    btnGenereer.addEventListener('click', genereerPDF);
+  } else {
+    // Als de knop niet direct gevonden wordt, kan het zijn dat de gebruiker een andere manier
+    // van aanroepen heeft (bijv. inline onclick). We voegen hier geen foutmelding toe
+    // om de flexibiliteit te behouden, maar het is goed om dit te weten.
+    console.info('Element met id "btnGenereer" niet gevonden voor automatische event listener. Functie genereerPDF() kan nog steeds handmatig of via inline onclick worden aangeroepen.');
+  }
 });
 
+/**
+ * Genereert een PDF-document op basis van de ingevulde formuliergegevens en geselecteerde clausules.
+ * Het document bevat secties zoals basisgegevens, beschrijvingen, diefstalinformatie, preventieclausules en fotobewijs.
+ */
 
-// Origineel script uitgebreid met oranje lijnen onder elke sectietitel, paginering en fotobewijs op nieuwe pagina
+// ------------- HELPERS ---------------
+
+// Verzamelt al je form-waarden in één object
+function collectFormData() {
+  const data = {};
+  document.querySelectorAll('#inspectie-form input, #inspectie-form select, #inspectie-form textarea')
+    .forEach(el => {
+      if (el.type === 'file') return;          // foto’s niet exporteren
+      if (el.type === 'checkbox') data[el.id] = el.checked;
+      else                            data[el.id] = el.value;
+    });
+  return data;
+}
+
+// Vul het formulier met data uit een object
+function applyFormData(data) {
+  Object.entries(data).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = val;
+    else                        el.value   = val;
+    // trigger eventueel change-event zodat je live opslaan en UI up-to-date blijft
+    el.dispatchEvent(new Event('change'));
+  });
+}
+
+// ------------- EXPORT ---------------
+
+function exportForm() {
+  const data = collectFormData();
+  const json = JSON.stringify(data, null, 2);
+  // automatische bestandsnaam, je mag hier zelf iets anders kiezen
+  const defaultName = data.beheerder
+    ? `Inspectie_${data.beheerder}.json`
+    : `Inspectie_Formulier.json`;
+
+  // Blob aanmaken en download starten
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href       = url;
+  a.download   = prompt('Bestandsnaam', defaultName) || defaultName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// ------------- IMPORT ---------------
+
+// event komt van <input type="file" onchange="importForm(event)">
+function importForm(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      applyFormData(data);
+      alert('Formulier geladen: ' + file.name);
+    } catch(err) {
+      alert('Fout bij inladen JSON: ' + err);
+    }
+  };
+  reader.readAsText(file);
+}
+
 function genereerPDF() {
-  const { jsPDF } = window.jspdf;
+  // Initialiseer een nieuw jsPDF document.
+  // "p": portretmodus
+  // "mm": eenheid in millimeters
+  // "a4": papierformaat A4
   const doc = new jsPDF("p", "mm", "a4");
+
+  // Haal de afmetingen van de pagina en stel marges in.
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 15;
-  let y = margin;
+  const margin = 15; // Marge aan alle kanten van de pagina
+  let y = margin;    // Huidige y-positie op de pagina, startend bij de bovenmarge
 
-  // Hulpfunctie: nieuwe pagina als niet genoeg ruimte
+  // ---------------------------------------------------------------------------
+  // HULPFUNCTIES BINNEN genereerPDF
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Zorgt ervoor dat er voldoende verticale ruimte is op de huidige pagina.
+   * Als de benodigde hoogte de paginalimiet overschrijdt, wordt een nieuwe pagina toegevoegd.
+   * @param {number} height - De benodigde hoogte in mm.
+   */
   function ensureSpace(height) {
     if (y + height > pageHeight - margin) {
       doc.addPage();
-      y = margin;
+      y = margin; // Reset y-positie naar de bovenmarge op de nieuwe pagina
     }
   }
 
-  // Titel met oranje lijn eronder (tekstkleur zwart, lijn oranje)
+  /**
+   * Tekent een sectietitel met een oranje onderlijn.
+   * @param {string} text - De tekst van de titel.
+   */
   function drawTitle(text) {
-    doc.setFont("Times New Roman", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(0); // titel in zwart
-    ensureSpace(10);
-    doc.text(text, margin, y);
-    y += 4;
-    doc.setDrawColor(255, 102, 0); // oranje lijn
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 8; // extra ruimte onder de oranje lijn
+    const fontSizePt = 11;
+    const lineWidth = 0.2; // Dikte van de oranje lijnen
+    
+    // Afstanden:
+    // distTopLineToBaseline: Afstand van het midden van de bovenste lijn tot de baseline van de tekst.
+    // Gekozen zodat de lijn netjes boven de kapitalen/ascenders van de tekst komt.
+    // Een 11pt Gill Sans MT heeft een cap height van ong. 2.6mm en ascender van ong. 2.8mm.
+    // Als we de lijn 3mm boven de baseline plaatsen, is er een kleine ruimte boven de letters.
+    const distTopLineToBaseline = 3.0; // mm 
+    
+    // distBaselineToBottomLine: Afstand van de baseline van de tekst tot het midden van de onderste lijn.
+    // Gevraagd om deze dichterbij te brengen. 1.5mm is een goede waarde.
+    const distBaselineToBottomLine = 1.5; // mm
+    
+    // Ruimte na de gehele titelconstructie (onderste lijn tot volgende content).
+    const spaceAfterBlock = 6; // mm (was 8mm, kan aangepast worden naar wens)
+
+    // Bereken de totale hoogte die nodig is voor deze titelconstructie voor de ensureSpace check.
+    // Dit is de afstand van de bovenkant van de bovenste lijn tot de onderkant van de onderste lijn,
+    // plus de ruimte na het blok.
+    // Totale hoogte = (afstand van midden bovenlijn tot midden onderlijn) + lijndikte + ruimte na blok
+    // Afstand midden bovenlijn tot midden onderlijn = distTopLineToBaseline + distBaselineToBottomLine
+    const blockHeight = distTopLineToBaseline + distBaselineToBottomLine;
+    ensureSpace(blockHeight + lineWidth + spaceAfterBlock);
+
+    doc.setFont("Gill Sans MT", "bold");
+    doc.setFontSize(fontSizePt);
+    doc.setTextColor(0); // Zwarte tekstkleur
+    doc.setDrawColor(255, 102, 0); // Oranje kleur voor de lijnen
+    doc.setLineWidth(lineWidth);
+
+    // 1. Bovenste oranje lijn
+    // y is de startpositie van de hele titelblokconstructie.
+    // De lijn wordt getekend met y als het midden van de lijn.
+    const yLine1 = y + (lineWidth / 2);
+    doc.line(margin, yLine1, pageWidth - margin, yLine1);
+
+    // 2. Titeltekst
+    // De baseline van de tekst wordt berekend vanaf het midden van de bovenste lijn.
+    const yTextBaseline = yLine1 + distTopLineToBaseline;
+    doc.text(text, margin, yTextBaseline);
+
+    // 3. Onderste oranje lijn
+    // Het midden van de onderste lijn wordt berekend vanaf de baseline van de tekst.
+    const yLine2 = yTextBaseline + distBaselineToBottomLine;
+    doc.line(margin, yLine2, pageWidth - margin, yLine2);
+
+    // 4. Update de globale y-positie voor de volgende content.
+    // Start vanaf de onderkant van de onderste lijn.
+    y = yLine2 + (lineWidth / 2) + spaceAfterBlock;
   }
 
+  /**
+   * Slaat het gegenereerde PDF-document op.
+   * De bestandsnaam wordt dynamisch bepaald op basis van de waarde van het 'beheerder' inputveld.
+   */
   function savePdf() {
-    const beheerder = document.getElementById("beheerder").value.trim();
-    const naam = beheerder ? `Inspectie_${beheerder}.pdf` : "Inspectierapport.pdf";
+    const beheerderInput = document.getElementById("beheerder");
+    const beheerder = beheerderInput ? beheerderInput.value.trim() : "";
+    const naam = beheerder ? `Inspectie_${beheerder.replace(/[^a-zA-Z0-9_]/g, '_')}.pdf` : "Inspectierapport.pdf"; // Vervang ongeldige tekens in bestandsnaam
     doc.save(naam);
   }
 
+  // ---------------------------------------------------------------------------
+  // START OPBOUW PDF-DOCUMENT
+  // ---------------------------------------------------------------------------
+
+  // Laad het logo en voeg het toe aan de PDF.
+  // Dit gebeurt asynchroon; de rest van de PDF-generatie start pas nadat het logo geladen is.
   const logo = new Image();
-  logo.src = "data:image/png;base64,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";
+  logo.src = "data:image/png;base64,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"; // VERVANG "urlinvoegen" MET DE DAADWERKELIJKE URL OF BASE64 DATA VAN HET LOGO
+
   logo.onload = function() {
-    doc.addImage(logo, "PNG", margin, y, 170, 20);
-    y += 28;
+    // Voeg het geladen logo toe aan de PDF.
+    // "PNG": formaat van de afbeelding (jsPDF ondersteunt ook JPEG, etc.)
+    // margin, y: positie (linker bovenhoek)
+    // 170, 20: breedte en hoogte van de afbeelding in mm
+    doc.addImage(logo, "PNG", margin, y, 42, 42);
+    y += 48; // Verhoog y-positie na het logo (logohoogte + extra ruimte)
 
-    // HEADER
-    const headerH = 20;
-    ensureSpace(headerH + 10);
-    doc.setDrawColor(0).setFillColor(230);
-    doc.rect(margin, y, pageWidth - 2 * margin, headerH, "FD");
-    const midY = y + headerH / 2;
-    doc.setFont("Times New Roman", "bold").setFontSize(18).setTextColor(135, 9, 48);
-    doc.text("Inspectierapport", margin + 3, midY - 4, { baseline: "middle" });
-    doc.setFontSize(20).setTextColor(0, 75, 134);
-    doc.text("Risicoanalyse | BRAND", margin + 3, midY + 6, { baseline: "middle" });
-    y += headerH + 10;
+    // ---------------------------------------------------------------------------
+    // SECTIE: HEADER (Inspectierapport Titel)
+    // ---------------------------------------------------------------------------
 
-    // INFO KADER
-    const infoH = 20;
+
+    const headerH = 20; // Hoogte van het headerblok
+    ensureSpace(headerH + 10); // Zorg voor ruimte voor header + marge eronder
+    // doc.setDrawColor(0); // Zwarte randkleur - NIET MEER NODIG
+    // doc.setFillColor(230, 230, 230); // Lichtgrijze achtergrondkleur (RGB) - NIET MEER NODIG
+    // doc.rect(margin, y, pageWidth - 2 * margin, headerH, "FD"); // Teken een gevulde rechthoek met rand (Fill and Draw) - VERWIJDERD
+
+    const midY = y + headerH / 2; // Verticale middellijn van de headerbox
+    doc.setFont("Gill Sans MT", "bold");
+    doc.setFontSize(36);
+    doc.setTextColor(135, 9, 48); // Donkerrode tekstkleur
+    doc.text("Inspectierapport", margin + 3, midY - 7, { baseline: "middle" }); // Iets hoger geplaatst
+
+    doc.setFontSize(48);
+    doc.setTextColor(0, 75, 134); // Blauwe tekstkleur
+    doc.text("Risicoanalyse | BRAND", margin + 3, midY + 15, { baseline: "middle" }); // Iets lager geplaatst
+    y += headerH + 10; // Verhoog y-positie na header + extra ruimte
+
+    // ---------------------------------------------------------------------------
+    // SECTIE: INFO KADER (Contactinformatie)
+    // ---------------------------------------------------------------------------
+    const extraSpace = 40; // Bijvoorbeeld 40 punten extra ruimte
+    y += extraSpace; // Verhoog de y-positie
+    
+    const infoH = 20; // Hoogte van het infokader
     ensureSpace(infoH + 10);
-    doc.setDrawColor(0).setFillColor(255);
-    doc.rect(margin, y, pageWidth - 2 * margin, infoH, "FD");
-    let infoY = y + 6;
+    doc.setDrawColor(0); // Zwarte randkleur
+    doc.setFillColor(255, 255, 255); // Witte achtergrondkleur
+    doc.rect(margin, y, pageWidth - 2 * margin, infoH, "FD"); // Teken gevulde rechthoek met rand
+
+    let infoY = y + 6; // Start y-positie voor tekst binnen het infokader
     const infoData = [
       ["Naam", "Joetri Van Dijck"],
       ["Functie", "Field Underwriter"],
       ["E-mail", "joetri.van.dijck@vivium.be"]
     ];
-    doc.setFontSize(11);
-    infoData.forEach(([lab, val]) => {
-      doc.setFont("Times New Roman", "bold");
-      doc.setTextColor(0);
-      doc.text(`${lab}:`, margin + 3, infoY);
-      doc.setFont("Times New Roman", "normal");
-      doc.text(val, margin + 40, infoY);
-      infoY += 6;
-    });
-    y += infoH + 10;
 
-    // BASISGEGEVENS
+    doc.setFontSize(11);
+    infoData.forEach(([label, value]) => {
+      doc.setFont("Gill Sans MT", "bold");
+      doc.setTextColor(0); // Zwarte tekst
+      doc.text(`${label}:`, margin + 3, infoY);
+      doc.setFont("Gill Sans MT", "normal");
+      doc.text(value, margin + 40, infoY); // Waarde iets verder naar rechts
+      infoY += 6; // Volgende regel
+    });
+    y += infoH + 10; // Verhoog y-positie na infokader + extra ruimte
+
+    // ---------------------------------------------------------------------------
+    // SECTIE: BASISGEGEVENS
+    // ---------------------------------------------------------------------------
     drawTitle('Basisgegevens');
-    const basis = [
+    const basisgegevensFields = [
       ["Maatschappij", "maatschappij"],
       ["Zetel", "zetel"],
       ["Beheerder", "beheerder"],
@@ -102,285 +286,398 @@ function genereerPDF() {
       ["Datum Bezoek", "datumbezoek"],
       ["Datum Rapport", "datumrapport"]
     ];
+
     doc.setFontSize(11);
-    basis.forEach(([lab, id]) => {
-      const val = document.getElementById(id).value;
-      if (!val) return;
-      ensureSpace(7);
-      doc.setFont("Times New Roman", "bold");
-      doc.text(`${lab}:`, margin, y);
-      doc.setFont("Times New Roman", "normal");
-      doc.text(val, margin + 50, y);
-      y += 7;
+    basisgegevensFields.forEach(([label, elementId]) => {
+      const inputElement = document.getElementById(elementId);
+      const value = inputElement ? inputElement.value.trim() : "";
+      if (!value) return; // Sla over als het veld leeg is
+
+      ensureSpace(7); // Ruimte voor één regel tekst
+      doc.setFont("Gill Sans MT", "bold");
+      doc.text(`${label}:`, margin, y);
+      doc.setFont("Gill Sans MT", "normal");
+      doc.text(value, margin + 50, y); // Waarde verder naar rechts
+      y += 7; // Volgende regel
     });
 
-    // BESCHRIJVING + OPMERKINGEN
-    const beschSections = [
-      ["Beschrijving inspectie", "tekstveld"],
-      ["Opmerkingen", "tekst1"]
+    // ---------------------------------------------------------------------------
+    // SECTIE: BESCHRIJVING INSPECTIE & OPMERKINGEN (Algemeen)
+    // ---------------------------------------------------------------------------
+    const beschrijvingSections = [
+      { title: "Beschrijving Activiteit", id: "tekstveld" },
+      { title: "Opmerkingen", id: "tekst1" }
     ];
-    beschSections.forEach(([title, id]) => {
-      const txt = document.getElementById(id).value;
-      if (!txt) return;
-      drawTitle(title);
-      const lines = doc.splitTextToSize(txt, pageWidth - 2 * margin);
+
+    beschrijvingSections.forEach(section => {
+      const textAreaElement = document.getElementById(section.id);
+      const textContent = textAreaElement ? textAreaElement.value.trim() : "";
+      if (!textContent) return; // Sla over als het tekstveld leeg is
+
+      drawTitle(section.title);
+      // Verdeel lange tekst over meerdere regels, passend binnen de paginabreedte (met marges)
+      const lines = doc.splitTextToSize(textContent, pageWidth - 2 * margin);
+      doc.setFont("Gill Sans MT", "normal"); // Zorg dat de body tekst normaal is
       doc.setFontSize(11);
       lines.forEach(line => {
-        ensureSpace(6);
+        ensureSpace(6); // Ruimte per regel
         doc.text(line, margin, y);
         y += 6;
       });
     });
 
-    // DIEFSTALSECTIES
-    const categories = [
-      ["Omgeving", ["th-ligging","th-bouwtype","th-toegangen","th-sociale","th-risicoadres","th-risicoadres-omschrijving","th-vlucht","th-omgevings-opm"]],
-      ["Antecedenten", ["th-antecedent-incident","th-antecedent-omschrijving"]],
-      ["Inhoud", ["th-inhoud-omschrijving","th-dekking","th-verzekeraar"]],
-      ["Kluis", ["th-kluis-aanwezig","th-kluis-merk","th-kluis-afm","th-kluis-elektrisch","th-kluis-mechanisch","th-kluis-standplaats","th-kluis-waarde","th-kluis-conform","th-kluis-beoordeling","th-kluis-opm"]],
-      ["Beveiliging terrein", ["th-terrein-beoordeling","th-perimetermaatregelen"]],
-      ["Mechanische beveiliging", ["th-mech-gevels","th-mech-dak","th-mech-deuren","th-mech-poorten","th-mech-vaste-ramen","th-mech-open-ramen","th-mech-koepels","th-mech-opm"]],
-      ["Elektronische beveiliging", ["th-elec-alarmsysteem","th-elec-installateur","th-elec-fod","th-elec-incert","th-elec-onderhoud","th-elec-conformiteit","th-elec-doormelding","th-elec-omschrijving"]]
+    // ---------------------------------------------------------------------------
+    // SECTIE: DIEFSTALSECTIES (Dynamisch opgebouwd)
+    // ---------------------------------------------------------------------------
+    const diefstalCategories = [
+      { title: "Omgeving", ids: ["th-ligging", "th-bouwtype", "th-toegangen", "th-sociale", "th-risicoadres", "th-risicoadres-omschrijving", "th-vlucht", "th-omgevings-opm"] },
+      { title: "Antecedenten", ids: ["th-antecedent-incident", "th-antecedent-omschrijving"] },
+      { title: "Inhoud", ids: ["th-inhoud-omschrijving", "th-dekking", "th-verzekeraar"] },
+      { title: "Kluis", ids: ["th-kluis-aanwezig", "th-kluis-merk", "th-kluis-afm", "th-kluis-elektrisch", "th-kluis-mechanisch", "th-kluis-standplaats", "th-kluis-waarde", "th-kluis-conform", "th-kluis-beoordeling", "th-kluis-opm"] },
+      { title: "Beveiliging terrein", ids: ["th-terrein-beoordeling", "th-perimetermaatregelen"] },
+      { title: "Mechanische beveiliging", ids: ["th-mech-gevels", "th-mech-dak", "th-mech-deuren", "th-mech-poorten", "th-mech-vaste-ramen", "th-mech-open-ramen", "th-mech-koepels", "th-mech-opm"] },
+      { title: "Elektronische beveiliging", ids: ["th-elec-alarmsysteem", "th-elec-installateur", "th-elec-fod", "th-elec-incert", "th-elec-onderhoud", "th-elec-conformiteit", "th-elec-doormelding", "th-elec-omschrijving"] }
     ];
+
     doc.setFontSize(11);
-    categories.forEach(([cat, ids]) => {
-      drawTitle(cat);
-      ids.forEach(id => {
-        const val = document.getElementById(id).value;
-        if (!val) return;
-        const lines = doc.splitTextToSize(val, pageWidth - 2 * margin - 50);
-        const blockH = lines.length * 6 + 4;
-        ensureSpace(blockH);
-        doc.setFont("Times New Roman", "bold");
-        doc.text(`${id.replace('th-','')}:`, margin, y);
-        doc.setFont("Times New Roman", "normal");
-        doc.text(lines, margin + 50, y);
-        y += blockH;
-      });
-    });
-
-    const anyChecked = clauses.some(c => document.getElementById(`chk-${c.id}`).checked);
-    if (anyChecked) {
-      // ─── nieuwe pagina forceren ───
-      doc.addPage();
-      y = margin;
-
-      // vóór dit stukje: zorg dat je genoeg ruimte hebt
-
-ensureSpace(18);
-
-// hoogte van het kader
-const boxH = 12;
-
-// teken alleen de rand (D = draw-only), geen fill
-doc.setDrawColor(0);
-doc.rect(
-  margin, y,
-  pageWidth - 2 * margin, boxH,
-  'D'
-);
-
-// zet de font en kleur
-doc.setFont("Times New Roman", "bold")
-   .setFontSize(12)
-   .setTextColor(0);
-
-// teken “Preventie” links, verticaal gecentreerd
-doc.text(
-  "Preventie",
-  margin + 3,         // kleine marge van 3 mm vanaf de linkerrand
-  y + boxH / 2,       // midden van de box
-  { baseline: "middle", align: "left" }
-);
-
-// schuif de y-waarde op onder dit kader
-y += boxH + 8;
- 
-    
-      // ─── intro-tekst vóór de clausules ───
-      doc.setFont("Times New Roman", "italic").setFontSize(12);
-      doc.text(
-        "Clausule – Prioriteitsbepaling van de preventiemaatregel(s)    NR 1576",
-        margin,
-        y
-      );
-      y += 8;
-    
-      doc.setFont("Times New Roman", "italic").setFontSize(10);
-      const bullets = [
-        "A: Noodzakelijk uit te voeren alvorens te kunnen accepteren,",
-        "B: Uit te voeren uiterlijk tegen aangeduide datum,",
-        "C: Wenselijke preventiemaatregelen, echter niet verplichtend,",
-        "D: Reeds (grotendeels) aanwezig, doch dient integraal bestendigd te worden."
-      ];
-      bullets.forEach(line => {
-        ensureSpace(6);
-        doc.text(line, margin + 4, y);
-        y += 6;
-      });
-      y += 4; // wat extra ruimte
-    
-      const agreementText =
-        "Er is tussen de partijen uitdrukkelijk overeengekomen dat bij niet-uitvoering van de hierna vermelde " +
-        "en gespecificeerde verplichtingen binnen de opgegeven termijn, de Verzekeringsnemer geen recht heeft op " +
-        "enige verzekeringsprestatie wanneer er een oorzakelijk verband bestaat tussen de niet-uitvoering van een of " +
-        "meerdere verplichtingen en het overkomen van een schadegeval. De maatschappij behoudt bovendien het recht om " +
-        "de polis wegens niet- of gedeeltelijke uitvoering van de opgelegde preventiemaatregelen op te zeggen, dit met " +
-        "in acht name van een vooropzeg van 30 (dertig) dagen.";
-      const agreementLines = doc.splitTextToSize(agreementText, pageWidth - 2 * margin);
-      agreementLines.forEach(line => {
-        ensureSpace(6);
-        doc.text(line, margin, y);
-        y += 6;
+    diefstalCategories.forEach(category => {
+      // Controleer eerst of er minstens één veld in deze categorie een waarde heeft
+      const hasValues = category.ids.some(id => {
+        const element = document.getElementById(id);
+        return element && element.value.trim();
       });
 
-      // 3) Wit scheidingslijntje
-      y += 4;                                 // wat extra ruimte
-      doc.setDrawColor(255, 255, 255);       // wit
-      doc.setLineWidth(0.5);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 8;                                 // ruimte voor de volgende titel
+      if (hasValues) {
+        drawTitle(category.title);
+        category.ids.forEach(id => {
+          const inputElement = document.getElementById(id);
+          const value = inputElement ? inputElement.value.trim() : "";
+          if (!value) return; // Sla dit specifieke veld over als het leeg is
 
+          // Label (haal 'th-' prefix weg voor weergave)
+          const label = id.replace(/^th-/, '').replace(/-/g, ' '); // Vervang '-' met spaties voor betere leesbaarheid
+          const formattedLabel = label.charAt(0).toUpperCase() + label.slice(1); // Eerste letter hoofdletter
 
+          // Verdeel de waarde over meerdere regels indien nodig
+          const lines = doc.splitTextToSize(value, pageWidth - 2 * margin - 50); // 50mm gereserveerd voor label
+          const blockHeight = lines.length * 6; // Hoogte van de tekstblock
+          
+          ensureSpace(blockHeight + 2); // +2 voor kleine marge onder label
 
-// Loop door alle geselecteerde clausules en genereer PDF-content
-clauses.forEach(clause => {
-  // 1. Controleer of de checkbox voor deze clausule is aangevinkt
-  if (!document.getElementById(`chk-${clause.id}`).checked) return;
-
-  // 2. Titel instellen (cursief, 12pt)
-  doc.setFont('Times New Roman', 'italic').setFontSize(12);
-  ensureSpace(10);                              // Zorg voor verticale ruimte indien nodig
-  doc.text(clause.title, margin, y);           // Schrijf de titel op positie (margin, y)
-
-  // 3. Lijn direct onder de titel tekenen
-  const titleBaseline = y;                      // Bewaar y-positie van de titeltekst
-  const lineY = titleBaseline + 2;             // Offset van 2pt onder de tekst
-  const startX = margin;
-  const endX = doc.internal.pageSize.getWidth() - margin;
-  doc.setDrawColor(0);                         // Zwarte kleur
-  doc.setLineWidth(0.5);                       // Lijndikte 0.5pt
-  doc.line(startX, lineY, endX, lineY);        // Teken de lijn
-
-  // 4. Verplaats y naar de start van de body
-  y = lineY + 6;                               // 6pt ruimte erna
-
-  // 5. Prioriteit en termijn ophalen en tekenen
-  const pr = document.getElementById(`priority-${clause.id}`).value;
-  const dt = document.getElementById(`deadline-${clause.id}`).value || '-';
-  // Label 'Prioriteit:' in bold-italic 11pt
-  doc.setFont('Times New Roman', 'bolditalic').setFontSize(11)
-     .text('Prioriteit:', margin, y);
-  // Waarde in italic
-  doc.setFont('Times New Roman', 'italic')
-     .text(pr, margin + 40, y);
-  y += 6;
-
-  // Label 'Termijn:'
-  doc.setFont('Times New Roman', 'bolditalic')
-     .text('Termijn:', margin, y);
-  doc.setFont('Times New Roman', 'italic')
-     .text(dt, margin + 40, y);
-  y += 8;
-
-  // 6. Inhoud of vrije tekst / invulvelden voor clausule 30 en 31
-  doc.setFont('Times New Roman', 'italic').setFontSize(11);
-  if (clause.id === 30) {
-    // Lees defect-velden uit inputs voor clause 30
-    const d1 = document.getElementById('defect-1').value || '...';
-    const d2 = document.getElementById('defect-2').value || '...';
-    const d3 = document.getElementById('defect-3').value || '...';
-    ensureSpace(6);
-    doc.text('- Volgende vastgestelde gebreken aan gebouwen, afwerkingen en/of technische installaties dienen uitgevoerd te worden :', margin, y);
-    y += 6;
-    [d1, d2, d3].forEach(def => {
-      ensureSpace(6);
-      doc.text(`  o ${def}`, margin, y);
-      y += 6;
+          doc.setFont("Gill Sans MT", "bold");
+          doc.text(`${formattedLabel}:`, margin, y);
+          doc.setFont("Gill Sans MT", "normal");
+          doc.text(lines, margin + 50, y); // Tekst van waarde naast het label
+          y += blockHeight + 4; // Verhoog y met hoogte van tekstblok + extra ruimte
+        });
+      }
     });
-  } else if (clause.id === 31) {
-    // Lees vrije tekst uit textarea #free-text-31
-    const freeText31 = document.getElementById('free-text-31').value || '';
-    const lines31 = doc.splitTextToSize(freeText31, pageWidth - 2 * margin);
-    lines31.forEach(line => {
-      ensureSpace(6);
-      doc.text(line, margin, y);
-      y += 6;
-    });
-  } else {
-    // Standaard clausule-content
-    const contentLines = doc.splitTextToSize(clause.content, pageWidth - 2 * margin);
-    contentLines.forEach(line => {
-      ensureSpace(6);
-      doc.text(line, margin, y);
-      y += 6;
-    });
-  }
 
-  // 7. Opmerkingen (indien aanwezig)
-  const cm = document.getElementById(`comment-${clause.id}`).value.trim();
-  if (cm) {
-    ensureSpace(10);
-    // Titel 'Opmerking(en)' in bold-italic
-    doc.setFont('Times New Roman', 'bolditalic')
-       .text('Opmerking(en)', margin, y);
-    y += 4;
-    doc.setDrawColor(0);
-    y += 8;
-    // Tekst van de opmerking
-    const cmLines = doc.splitTextToSize(cm, pageWidth - 2 * margin);
-    cmLines.forEach(l => {
-      ensureSpace(6);
-      doc.text(l, margin, y);
-      y += 6;
-    });
-  }
+    // ---------------------------------------------------------------------------
+    // SECTIE: PREVENTIECLAUSULES
+    // Deze sectie wordt alleen toegevoegd als er clausules zijn geselecteerd.
+    // De 'clauses' variabele wordt verwacht uit clauses.js te komen.
+    // ---------------------------------------------------------------------------
+    // Controleer of 'clauses' bestaat en een array is
+    if (typeof clauses !== 'undefined' && Array.isArray(clauses)) {
+        const anyClauseChecked = clauses.some(c => {
+            const checkbox = document.getElementById(`chk-${c.id}`);
+            return checkbox && checkbox.checked;
+        });
 
-  // 8. Ruimte voor de volgende clausule
-  y += 8;
-});
-}
-    
-    // FOTOBEWIJS altijd nieuwe pagina
-    const files = Array.from(document.getElementById('afbeeldingen').files);
-    if (files.length) {
+        if (anyClauseChecked) {
+            doc.addPage(); // Forceer een nieuwe pagina voor de preventieclausules
+            y = margin;    // Reset y-positie
+
+            // Titel "Preventie" in een kader
+            ensureSpace(18); // Ruimte voor het kader en tekst
+            const boxH = 12; // Hoogte van het kader
+            doc.setDrawColor(0); // Zwarte randkleur
+            doc.rect(margin, y, pageWidth - 2 * margin, boxH, 'D'); // Teken alleen de rand (Draw-only)
+            doc.setFont("Gill Sans MT", "bold").setFontSize(12).setTextColor(0);
+            doc.text("Preventie", margin + 3, y + boxH / 2, { baseline: "middle", align: "left" });
+            y += boxH + 8; // Ruimte na het kader
+
+            // Introductietekst voor de clausules
+            doc.setFont("Gill Sans MT", "italic").setFontSize(12);
+            ensureSpace(8);
+            doc.text("Clausule – Prioriteitsbepaling van de preventiemaatregel(s) \u00A0\u00A0\u00A0\u00A0NR 1576", margin, y); // \u00A0 is een non-breaking space
+            y += 8;
+
+            // Lijst met prioriteitsdefinities
+            doc.setFont("Gill Sans MT", "italic").setFontSize(10);
+            const priorityBullets = [
+                "A: Noodzakelijk uit te voeren alvorens te kunnen accepteren,",
+                "B: Uit te voeren uiterlijk tegen aangeduide datum,",
+                "C: Wenselijke preventiemaatregelen, echter niet verplichtend,",
+                "D: Reeds (grotendeels) aanwezig, doch dient integraal bestendigd te worden."
+            ];
+            priorityBullets.forEach(bulletText => {
+                ensureSpace(6);
+                doc.text(bulletText, margin + 4, y); // Met kleine inspringing
+                y += 6;
+            });
+            y += 4; // Extra ruimte
+
+            // Overeenkomsttekst
+            doc.setFont("Gill Sans MT", "normal").setFontSize(10); // Normale tekst voor de overeenkomst
+            const agreementText =
+                "Er is tussen de partijen uitdrukkelijk overeengekomen dat bij niet-uitvoering van de hierna vermelde " +
+                "en gespecificeerde verplichtingen binnen de opgegeven termijn, de Verzekeringsnemer geen recht heeft op " +
+                "enige verzekeringsprestatie wanneer er een oorzakelijk verband bestaat tussen de niet-uitvoering van een of " +
+                "meerdere verplichtingen en het overkomen van een schadegeval. De maatschappij behoudt bovendien het recht om " +
+                "de polis wegens niet- of gedeeltelijke uitvoering van de opgelegde preventiemaatregelen op te zeggen, dit met " +
+                "in acht name van een vooropzeg van 30 (dertig) dagen.";
+            const agreementLines = doc.splitTextToSize(agreementText, pageWidth - 2 * margin);
+            agreementLines.forEach(line => {
+                ensureSpace(6);
+                doc.text(line, margin, y);
+                y += 6;
+            });
+
+            // Wit scheidingslijntje (of eerder, een lege ruimte met potentiële lijn)
+            y += 4;
+            // doc.setDrawColor(255, 255, 255); // Wit - dit zal onzichtbaar zijn op witte achtergrond. Als een echte lijn nodig is, andere kleur.
+            // doc.setLineWidth(0.5);
+            // doc.line(margin, y, pageWidth - margin, y);
+            y += 8; // Ruimte voor de eerste clausuletitel
+
+            // Verwerk elke geselecteerde clausule
+            clauses.forEach(clause => {
+                const clauseCheckbox = document.getElementById(`chk-${clause.id}`);
+                if (!clauseCheckbox || !clauseCheckbox.checked) return; // Sla over als niet aangevinkt
+
+                // 1. Titel van de clausule
+                doc.setFont('Gill Sans MT', 'italic').setFontSize(12);
+                ensureSpace(10); // Ruimte voor titel, lijn en wat marge
+                doc.text(clause.title, margin, y);
+
+                // 2. Lijn direct onder de titel
+                const titleBaselineY = y;
+                const lineOffsetY = titleBaselineY + 2; // Offset voor de lijn onder de tekst
+                doc.setDrawColor(0); // Zwarte lijn
+                doc.setLineWidth(0.5);
+                doc.line(margin, lineOffsetY, pageWidth - margin, lineOffsetY);
+                y = lineOffsetY + 6; // y-positie na de lijn + marge
+
+                // 3. Prioriteit en Termijn
+                const priorityElement = document.getElementById(`priority-${clause.id}`);
+                const deadlineElement = document.getElementById(`deadline-${clause.id}`);
+                const priorityValue = priorityElement ? priorityElement.value : 'N/A';
+                const deadlineValue = deadlineElement && deadlineElement.value ? deadlineElement.value : '-';
+
+                ensureSpace(14); // Ruimte voor 2 regels (Prioriteit & Termijn)
+                doc.setFont('Gill Sans MT', 'bolditalic').setFontSize(11);
+                doc.text('Prioriteit:', margin, y);
+                doc.setFont('Gill Sans MT', 'italic');
+                doc.text(priorityValue, margin + 40, y);
+                y += 6;
+
+                doc.setFont('Gill Sans MT', 'bolditalic');
+                doc.text('Termijn:', margin, y);
+                doc.setFont('Gill Sans MT', 'italic');
+                doc.text(deadlineValue, margin + 40, y);
+                y += 8; // Extra ruimte na termijn
+
+                // 4. Inhoud van de clausule
+                doc.setFont('Gill Sans MT', 'italic').setFontSize(11); // Standaard stijl voor clausule-inhoud
+                if (clause.id === 30) { // Speciale behandeling voor clausule ID 30
+                    const defect1 = document.getElementById('defect-1')?.value || '...';
+                    const defect2 = document.getElementById('defect-2')?.value || '...';
+                    const defect3 = document.getElementById('defect-3')?.value || '...';
+                    
+                    ensureSpace(6);
+                    doc.text('- Volgende vastgestelde gebreken aan gebouwen, afwerkingen en/of technische installaties dienen uitgevoerd te worden :', margin, y);
+                    y += 6;
+                    [defect1, defect2, defect3].forEach(defectText => {
+                        ensureSpace(6);
+                        doc.text(`  o ${defectText}`, margin, y); // Inspringen met 'o' als bullet
+                        y += 6;
+                    });
+                } else if (clause.id === 31) { // Speciale behandeling voor clausule ID 31
+                    const freeText31 = document.getElementById('free-text-31')?.value || '';
+                    const lines31 = doc.splitTextToSize(freeText31, pageWidth - 2 * margin);
+                    lines31.forEach(line => {
+                        ensureSpace(6);
+                        doc.text(line, margin, y);
+                        y += 6;
+                    });
+                } else { // Standaard clausule-inhoud
+                    const contentLines = doc.splitTextToSize(clause.content, pageWidth - 2 * margin);
+                    contentLines.forEach(line => {
+                        ensureSpace(6);
+                        doc.text(line, margin, y);
+                        y += 6;
+                    });
+                }
+
+                // 5. Opmerkingen bij de clausule (indien aanwezig)
+                const commentElement = document.getElementById(`comment-${clause.id}`);
+                const commentText = commentElement ? commentElement.value.trim() : "";
+                if (commentText) {
+                    ensureSpace(10); // Ruimte voor titel "Opmerking(en)"
+                    doc.setFont('Gill Sans MT', 'bolditalic');
+                    doc.text('Opmerking(en):', margin, y); // ":" toegevoegd voor consistentie
+                    // y += 4; // Oorspronkelijk stond hier een lijn, die is nu weggelaten. Als die terug moet:
+                    // doc.setDrawColor(0); // zwarte lijn
+                    // doc.line(margin, y + 2, pageWidth - margin, y + 2); // lijn onder "Opmerking(en)"
+                    y += 6; // Naar volgende regel voor de opmerkingstekst
+
+                    doc.setFont('Gill Sans MT', 'italic'); // Opmerkingen in italic
+                    const commentLines = doc.splitTextToSize(commentText, pageWidth - 2 * margin);
+                    commentLines.forEach(line => {
+                        ensureSpace(6);
+                        doc.text(line, margin, y);
+                        y += 6;
+                    });
+                }
+                y += 8; // Extra ruimte voor de volgende clausule
+            });
+        }
+    } else {
+        console.warn("Variabele 'clauses' is niet gedefinieerd of geen array. Preventieclausules worden overgeslagen.");
+    }
+
+
+    // ---------------------------------------------------------------------------
+    // SECTIE: FOTOBEWIJS
+    // Wordt altijd op een nieuwe pagina gestart als er afbeeldingen zijn.
+    // ---------------------------------------------------------------------------
+    const afbeeldingenInput = document.getElementById('afbeeldingen');
+    const files = afbeeldingenInput ? Array.from(afbeeldingenInput.files) : [];
+
+    if (files.length > 0) {
       doc.addPage();
       y = margin;
       drawTitle("Fotobewijs");
-      const maxW = 80, maxH = 60, gapX = 1, gapY = 1;
-      let col = 0;
-      files.forEach((file, i) => {
+
+      const maxImgWidth = 80;  // Maximale breedte van een afbeelding in mm
+      const maxImgHeight = 60; // Maximale hoogte van een afbeelding in mm
+      const gapX = 5;          // Horizontale ruimte tussen afbeeldingen (indien meerdere per rij)
+      const gapY = 5;          // Verticale ruimte tussen afbeeldingrijen
+      let currentColumn = 0;   // Houdt bij in welke kolom de volgende afbeelding komt (0 of 1 voor twee kolommen)
+      const imagesPerRow = 2;  // Aantal afbeeldingen per rij
+
+      // Functie om afbeeldingen één voor één asynchroon te verwerken en toe te voegen.
+      // Gebruikt een IIFE (Immediately Invoked Function Expression) met recursie.
+      (function processImageFile(index) {
+        if (index >= files.length) {
+          // Alle afbeeldingen zijn verwerkt, sla de PDF op.
+          savePdf();
+          return;
+        }
+
         const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image(); img.src = e.target.result;
-          img.onload = () => {
-            let w = maxW, h = maxW * img.height / img.width;
-            if (h > maxH) { h = maxH; w = maxH * img.width / img.height; }
-            if (col === 0 && i) y += maxH + gapY;
-            if (y + h > pageHeight - margin) { doc.addPage(); y = margin; col = 0; }
-            const x = margin + col * (maxW + gapX);
-            doc.addImage(img, "JPEG", x, y, w, h, "", "FAST");
-            col = (col + 1) % 2;
-            if (i === files.length - 1) savePdf();
-          };
+        reader.onerror = () => {
+          console.error(`Fout bij het lezen van bestand: ${files[index].name}`);
+          processImageFile(index + 1); // Ga door met de volgende afbeelding
         };
-        reader.readAsDataURL(file);
-      });
+
+        reader.onload = function(event) {
+          const img = new Image();
+          img.onerror = () => {
+            console.error(`Fout bij het laden van afbeelding: ${files[index].name}`);
+            processImageFile(index + 1); // Ga door met de volgende afbeelding
+          };
+
+          img.onload = function() {
+            // Bereken de afmetingen van de afbeelding om te passen binnen maxW x maxH, met behoud van aspect ratio.
+            let w = img.width;
+            let h = img.height;
+            if (w > maxImgWidth) {
+              h = (maxImgWidth / w) * h;
+              w = maxImgWidth;
+            }
+            if (h > maxImgHeight) {
+              w = (maxImgHeight / h) * w;
+              h = maxImgHeight;
+            }
+            
+            // Bereken x-positie. Start nieuwe rij als nodig.
+            let xPos = margin + currentColumn * (maxImgWidth + gapX);
+
+            // Controleer of er een nieuwe pagina of nieuwe rij nodig is.
+            if (currentColumn === 0 && index > 0) { // Begin van een nieuwe rij (niet de allereerste afbeelding)
+                // Eerst controleren of dit de eerste afbeelding van een *nieuwe* rij is na een volle rij
+                // De y-positie is al verhoogd na de vorige rij.
+            }
+
+            // Controleer of de afbeelding op de huidige pagina past.
+            // Als we aan het begin van een kolom staan en het past niet, nieuwe pagina.
+            if (y + h > pageHeight - margin) {
+              doc.addPage();
+              y = margin;
+              drawTitle("Fotobewijs (vervolg)"); // Titel voor vervolgpagina
+              currentColumn = 0; // Reset kolom op nieuwe pagina
+              xPos = margin; // Reset xPos voor de eerste kolom
+            }
+
+            // Voeg de afbeelding toe.
+            doc.addImage(img, "JPEG", xPos, y, w, h, undefined, "FAST"); // "FAST" voor snellere rendering (kan kwaliteit beïnvloeden)
+
+            currentColumn++;
+            if (currentColumn >= imagesPerRow) {
+              currentColumn = 0; // Reset naar eerste kolom
+              y += maxImgHeight + gapY; // Ga naar volgende rij
+            }
+
+            // Verwerk de volgende afbeelding.
+            processImageFile(index + 1);
+          };
+          img.src = event.target.result; // event.target.result bevat de base64 data URL
+        };
+        reader.readAsDataURL(files[index]); // Lees het bestand als Data URL (base64)
+      })(0); // Start de verwerking met de eerste afbeelding (index 0)
+
     } else {
+      // Geen afbeeldingen, sla de PDF direct op.
       savePdf();
     }
+  }; // Einde van logo.onload
+
+  // Fallback voor als het logo niet laadt
+  logo.onerror = function() {
+    console.error("Logo kon niet geladen worden. PDF wordt zonder logo gegenereerd.");
+    // Optioneel: Roep hier direct de code aan die normaal in logo.onload staat,
+    // maar zonder de doc.addImage(logo, ...) call, of met een placeholder.
+    // Voor nu, gaan we ervan uit dat de PDF-generatie stopt als het logo essentieel is,
+    // of je kunt de rest van de PDF hieronder dupliceren (niet ideaal).
+    // Eenvoudigste is om de gebruiker te informeren en mogelijk toch door te gaan:
+    y += 28; // Simuleer ruimte voor logo
+    // ... (dan hier de rest van de PDF generatie code, startend met HEADER)
+    // ECHTER: de huidige structuur is afhankelijk van de asynchrone logo.onload.
+    // Het is beter om de flow te behouden en een foutmelding te geven.
+    // Of, als het logo niet kritisch is, de code die nu in logo.onload staat hier te plaatsen.
+    // Voor dit voorbeeld, wordt de PDF niet verder gegenereerd als het logo faalt.
+    alert("Fout bij het laden van het bedrijfslogo. Het PDF-rapport kan niet correct worden gegenereerd.");
   };
 }
 
 
-// Google Maps knop
+/**
+ * Zoekt een locatie op via Google Maps Static API en toont deze in een <img> element.
+ */
 function zoekOpGoogleMaps() {
-  const loc = document.getElementById("locatie").value.trim();
+  const locatieInput = document.getElementById("locatie");
+  if (!locatieInput) {
+    alert("Locatie inputveld niet gevonden.");
+    return;
+  }
+  const loc = locatieInput.value.trim();
   if (!loc) {
     alert("Voer een locatie in.");
     return;
   }
-  const key = "AIzaSyA1uZJGvM7-gPJ5dB0e9l_4dV5EIBPYXUE";
-  const url = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(loc)}&zoom=14&size=600x400&markers=color:red%7Clabel:S%7C${encodeURIComponent(loc)}&key=${AIzaSyA1uZJGvM7-gPJ5dB0e9l_4dV5EIBPYXUE}`;
-  document.getElementById("map-image").src = url;
+
+  // LET OP: Het is GEEN goede praktijk om API-sleutels direct in client-side JavaScript te embedden.
+  // Deze sleutel kan misbruikt worden. Overweeg een backend proxy service te gebruiken.
+  const apiKey = "AIzaSyA1uZJGvM7-gPJ5dB0e9l_4dV5EIBPYXUE"; // DEZE SLEUTEL IS ZICHTBAAR!
+  const url = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(loc)}&zoom=14&size=600x400&markers=color:red%7Clabel:S%7C${encodeURIComponent(loc)}&key=${apiKey}`;
+
+  const mapImageElement = document.getElementById("map-image");
+  if (mapImageElement) {
+    mapImageElement.src = url;
+  } else {
+    alert("Element om kaart in te tonen (map-image) niet gevonden.");
+  }
 }

@@ -501,8 +501,63 @@
         </div>
       </section>
 
+      <!-- ─── BESLUIT ─────────────────────────────────────────── -->
+<section class="besluit-section">
+  <h2>Besluit</h2>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="besluit-herinspectie">Herinspectie</label>
+      <select id="besluit-herinspectie">
+        <option value="">-- Kies --</option>
+        <option>Optie 1</option>
+        <option>Optie 2</option>
+        <option>Optie 3</option>
+        <option>Optie 4</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="besluit-antecedenten">Antecedenten</label>
+      <select id="besluit-antecedenten">
+        <option value="">-- Kies --</option>
+        <option>Optie A</option>
+        <option>Optie B</option>
+        <option>Optie C</option>
+        <option>Optie D</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group-full">
+      <label for="besluit-antecedenten-omschrijving">Indien “Ja”, omschrijf</label>
+      <textarea id="besluit-antecedenten-omschrijving" rows="2" placeholder="Beschrijving…"></textarea>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="besluit-technische">Technische beoordeling</label>
+      <select id="besluit-technische">
+        <option value="">-- Kies --</option>
+        <option>Goed</option>
+        <option>Matig</option>
+        <option>Slecht</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group-full">
+      <label for="besluit-advies">Persoonlijk advies m.b.t. acceptatie</label>
+      <textarea id="besluit-advies" rows="10" placeholder="Geef hier je advies…"></textarea>
+    </div>
+  </div>
+</section>
+<!-- ─── EINDE BESLUIT ──────────────────────────────────── -->
+
       <section class="clause-section">
-        <h2>Kies Clausules</h2>
+        <h2>Preventieplan</h2>
         <!-- Hier injecteert script.js automatisch de lijst -->
         <div id="clausesContainer"></div>
       </section>
@@ -512,6 +567,18 @@
         <label for="locatie">Google Maps-locatie</label>
         <input type="text" id="locatie" placeholder="Straat, stad"/>
         <button type="button" onclick="zoekOpGoogleMaps()">Toon kaart</button>
+      </div>
+
+      <!-- … bestaand formulier … -->
+
+      <div class="actions">
+        <button type="button" onclick="exportForm()">📁 Formulier exporteren</button>
+        <input type="file" id="importInput" accept=".json" style="display:none"
+              onchange="importForm(event)" />
+        <button type="button" onclick="document.getElementById('importInput').click()">
+          📂 Formulier importeren
+        </button>
+        <button type="button" onclick="genereerPDF()">Genereer PDF</button>
       </div>
 
 
