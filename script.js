@@ -1,3 +1,4 @@
+
 // script.js
 
 // Importeer jsPDF. Deze regel gaat ervan uit dat jsPDF via een <script> tag in de HTML is geladen.
@@ -372,6 +373,92 @@ function genereerPDF() {
         });
       }
     });
+
+    // -------------------------------------------------------
+// SECTIE: BESLUIT
+// Nieuwe pagina na diefstal, voor clausules
+// -------------------------------------------------------
+doc.addPage();
+y = margin;               // terug naar boven
+// 1) Kader en titel “Besluit” in 14pt
+const boxH = 12;                    // hoogte van het kader in mm
+ensureSpace(boxH + 4);              // ruimte voor kader + marge
+doc.setDrawColor(0);                // zwarte rand
+doc.setLineWidth(0.5);
+doc.rect(margin, y, pageWidth - 2 * margin, boxH);  // kader
+doc.setFont("Gill Sans MT","bold").setFontSize(14);
+doc.text(
+  "Besluit",
+  margin + 2,                     // klein inspringen van de tekst
+  y + boxH/2,                     // verticaal in het midden van het kader
+  { baseline: "middle" }
+);
+y += boxH + 6;                     // ruimte na het kader
+
+// 1) Herinspectie
+{
+  const val = document.getElementById('besluit-herinspectie').value || '-';
+  ensureSpace(7);
+  doc.setFont('Gill Sans MT','bold').setFontSize(11).text('Herinspectie:', margin, y);
+  doc.setFont('Gill Sans MT','normal').text(val, margin + 50, y);
+  y += 7;
+}
+
+// 2) Antecedenten
+{
+  const val = document.getElementById('besluit-antecedenten').value || '-';
+  ensureSpace(7);
+  doc.setFont('Gill Sans MT','bold').text('Antecedenten:', margin, y);
+  doc.setFont('Gill Sans MT','normal').text(val, margin + 50, y);
+  y += 7;
+
+  // Als er een omschrijving is ingevuld, toon die
+  const oms = document.getElementById('besluit-antecedenten-omschrijving').value.trim();
+  if (oms) {
+    ensureSpace(6);
+    doc.setFont('Gill Sans MT','italic').setFontSize(10).text('Indien “Ja”, omschrijf:', margin, y);
+    y += 6;
+    const lines = doc.splitTextToSize(oms, pageWidth - 2 * margin);
+    doc.setFont('Gill Sans MT','normal').setFontSize(11);
+    lines.forEach(line => {
+      ensureSpace(6);
+      doc.text(line, margin, y);
+      y += 6;
+    });
+    y += 4;
+  }
+}
+
+// 3) Technische beoordeling
+{
+  const val = document.getElementById('besluit-technische').value || '-';
+  ensureSpace(7);
+  doc.setFont('Gill Sans MT','bold').setFontSize(11).text('Technische beoordeling:', margin, y);
+  doc.setFont('Gill Sans MT','normal').text(val, margin + 50, y);
+  y += 7;
+}
+
+// 4) Persoonlijk advies
+{
+  const adv = document.getElementById('besluit-advies').value.trim();
+  if (adv) {
+    // Gewone label in zwart, bold 11pt
+    ensureSpace(10);
+    doc.setFont('Gill Sans MT', 'bold').setFontSize(11).setTextColor(0);
+    doc.text('Persoonlijk advies m.b.t. acceptatie', margin, y);
+    y += 7;
+
+    // De adviestekst zelf
+    doc.setFont('Gill Sans MT', 'normal').setFontSize(11);
+    const lines = doc.splitTextToSize(adv, pageWidth - 2 * margin);
+    lines.forEach(line => {
+      ensureSpace(6);
+      doc.text(line, margin, y);
+      y += 6;
+    });
+    y += 8;
+  }
+}
 
     // ---------------------------------------------------------------------------
     // SECTIE: PREVENTIECLAUSULES

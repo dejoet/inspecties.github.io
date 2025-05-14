@@ -289,7 +289,10 @@ window.renderClauses = function(containerId = 'clausesContainer') {
         <input type="checkbox" id="chk-${clause.id}" />
         <label for="chk-${clause.id}" class="clause-title">${clause.title}</label>
       </div>
-      <div class="clause-body">${clause.content}</div>
+      <!-- body standaard verbergen -->
+      <div class="clause-body" id="body-${clause.id}" style="display:none; margin:8px 0 16px 24px;">
+        ${clause.content}
+      </div>
       <div id="details-${clause.id}" class="clause-details clause-content" style="display:none; margin:8px 0 16px 24px;">
         <label>Prioriteit:</label>
         <select id="priority-${clause.id}">
@@ -303,10 +306,14 @@ window.renderClauses = function(containerId = 'clausesContainer') {
     `;
     container.appendChild(div);
 
-    const chk = document.getElementById(`chk-${clause.id}`);
+    const chk     = document.getElementById(`chk-${clause.id}`);
+    const body    = document.getElementById(`body-${clause.id}`);
     const details = document.getElementById(`details-${clause.id}`);
+
     chk.addEventListener('change', () => {
-      details.style.display = chk.checked ? 'block' : 'none';
+      const displayStyle = chk.checked ? 'block' : 'none';
+      body.style.display    = displayStyle;
+      details.style.display = displayStyle;
     });
   });
 };
