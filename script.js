@@ -758,7 +758,7 @@ function zoekOpGoogleMaps() {
 
   // LET OP: Het is GEEN goede praktijk om API-sleutels direct in client-side JavaScript te embedden.
   // Deze sleutel kan misbruikt worden. Overweeg een backend proxy service te gebruiken.
-  const apiKey = "AIzaSyA1uZJGvM7-gPJ5dB0e9l_4dV5EIBPYXUE"; // DEZE SLEUTEL IS ZICHTBAAR!
+  const apiKey = "test"; // DEZE SLEUTEL IS ZICHTBAAR!
   const url = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(loc)}&zoom=14&size=600x400&markers=color:red%7Clabel:S%7C${encodeURIComponent(loc)}&key=${apiKey}`;
 
   const mapImageElement = document.getElementById("map-image");
