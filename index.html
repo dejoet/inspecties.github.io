@@ -7,7 +7,12 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="clauses.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
   <script src="script.js" defer></script>
+  <!-- Zet dit in je HTML, vóór jouw script.js -->
+  
+
   
 </head>
 <body>
@@ -23,11 +28,11 @@
       <div class="grid">
         <div class="form-group">
           <label for="maatschappij">Maatschappij</label>
-          <input type="text" id="maatschappij" required/>
+          <input type="text" id="maatschappij" value="Vivium" required/>
         </div>
         <div class="form-group">
           <label for="zetel">Zetel</label>
-          <input type="text" id="zetel" required/>
+          <input type="text" id="zetel" value="Antwerpen" required/>
         </div>
         <div class="form-group">
           <label for="beheerder">Beheerder</label>
@@ -63,7 +68,7 @@
             <option value="">-- Kies --</option>
             <option>Producent</option>
             <option>Verzekerde</option>
-            <option>Andere</option>
+            <option selected>Producent & Verzekerde</option>
           </select>
         </div>
         <div class="form-group">
@@ -95,236 +100,443 @@
       </div>
       <!-- Einde bovenste grid -->
 
-      <!-- ─── DIEFSTAL – INSPECTIEFORMULIER ─────────────────── -->
-      <section class="diefstal-section">
-        <div class="section-container">
-          <h2>Diefstal – Inspectieformulier</h2>
+     <!-- ─── DIEFSTAL – INSPECTIEFORMULIER ─────────────────── -->
+                  <section class="diefstal-section">
+                  <div class="section-container">
+                    <h2>Inspectieformulier</h2>
 
-          <!-- Omgeving -->
-          <fieldset class="section-fieldset">
-            <legend>Omgeving</legend>
+            <fieldset class="section-fieldset">
+            <legend>Algemeen</legend>
+
             <div class="form-row">
               <div class="form-group">
-                <label for="th-ligging">Ligging</label>
-                <select id="th-ligging" name="ligging">
-                  <option value=""></option>
-                  <option>Bebouwde kom</option>
-                  <option>Landelijk</option>
-                  <option>Residentiële</option>
-                  <option>Stedelijke omgeving – gemengde functies (wonen/handel)</option>
-                  <option>Industriezone met toezicht / afgesloten terrein</option>
-                  <option>Industriezone zonder toezicht / vrij toegankelijk</option>
-                  <option>Handelszone met dagactiviteit</option>
-                  <option>lintbebouwing</option>
-                </select>
+                <label for="th-activiteit">Activiteit</label>
+                <input id="th-activiteit" name="activiteit" type="text" placeholder="Activiteit" />
               </div>
               <div class="form-group">
-                <label for="th-bouwtype">Bouwtype</label>
-                <select id="th-bouwtype" name="bouwtype">
-                  <option value=""></option>
-                  <option>Open bebouwing</option>
-                  <option>Halfopen bebouwing</option>
-                  <option>Gesloten bebouwing</option>
-                  <option>Appartement – gelijkvloers</option>
-                  <option>Appartement – verdieping met gemeenschappelijke inkom</option>
-                  <option>Bedrijfsgebouw / loods / magazijn</option>
-                </select>
+                <label for="th-uitbreidingen">Toekomstprojecten/uitbreidingen</label>
+                <input id="th-uitbreidingen" name="uitbreidingen" type="text" placeholder="Aanpassingen" />
               </div>
             </div>
+
             <div class="form-row">
               <div class="form-group">
-                <label for="th-toegangen">Aantal toegangen</label>
-                <select id="th-toegangen" name="toegangen">
+                <label for="th-hoedanigheid">Hoedanigheid van verzekerde</label>
+                <select id="th-hoedanigheid" name="hoedanigheid">
                   <option value=""></option>
-                  <option>1 toegang – uitsluitend via voordeur</option>
-                  <option>2 toegangen – hoofd- en achterdeur</option>
-                  <option>3 of meer – inclusief poorten, kelder- of daktoegang</option>
-                  <option>Onbewaakte gedeelde inkomzone / galerij</option>
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="th-sociale">Sociale controle</label>
-                <select id="th-sociale" name="socialeControle">
+                <label for="th-meerdere-huurders">Meerdere huurders/gebruikers</label>
+                <select id="th-meerdere-huurders" name="meerdereHuurders">
                   <option value=""></option>
-                  <option>ja, met zicht op het risico</option>
-                  <option>ja, echter op afstand</option>
                   <option>Neen</option>
-                  <option>Bewoond</option>
+                  <option>Ja</option>
                 </select>
               </div>
             </div>
+
+            <div class="form-row">
+              <div class="form-group-full">
+                <label for="th-huurders-omschrijving">Zo ja, omschrijf</label>
+                <input id="th-huurders-omschrijving" type="text" placeholder="Click here to enter text." />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group-full">
+                <label for="th-gebruik-opmerkingen">Opmerkingen</label>
+                <textarea id="th-gebruik-opmerkingen" name="gebruikOpmerkingen" rows="2" placeholder="Click here to enter text."></textarea>
+              </div>
+            </div>
+
+          <details class="kapitaal-section">
+            <summary>➕ Kapitalen</summary>
+
             <div class="form-row">
               <div class="form-group">
-                <label for="th-risicoadres">Risicoadres</label>
-                <select id="th-risicoadres" name="risicoadres">
+                <label for="th-kapitaal">Kapitaal (ABEX 1048)</label>
+                <select id="th-kapitaal" name="kapitaal">
                   <option value=""></option>
-                  <option>Ja,permanent</option>
-                  <option>Ja, niet permanent</option>
-                  <option>Neen</option>
-                  <option>Niet gekend / geen informatie beschikbaar</option>
+                  <option>Gekend in dossier</option>
+                  <option>Opgegeven door verzekerde</option>
+                  <option>Overgenomen verslag/rooster</option>
+                  <option>Geschat door RCC/Field</option>
+                  <option>nvt</option>
                 </select>
               </div>
-              <div class="form-group-full">
-                <label for="th-risicoadres-omschrijving">Omschrijving risicoadres</label>
-                <input id="th-risicoadres-omschrijving" type="text" placeholder="Bewoond door... " />
-              </div>
             </div>
+
             <div class="form-row">
               <div class="form-group">
-                <label for="th-vlucht">Vluchtmogelijkheden</label>
-                <select id="th-vlucht" name="vluchtmogelijkheden">
-                  <option value=""></option>
-                  <option>Gemakkelijk</option>
-                  <option>Niet gemakkelijk</option>
-                  <option>Zie opmerkingen</option>
-                </select>
+                <label for="th-gebouw">Gebouw</label>
+                <input id="th-gebouw" type="text" placeholder="Click here to enter text." />
               </div>
-              <div class="form-group-full">
-                <label for="th-omgevings-opm">Opmerkingen / Situatieschets</label>
-                <textarea id="th-omgevings-opm" rows="2" placeholder="bv. Achterzijde grenst aan veldweg zonder verlichting. Parkeerplaats niet verlicht."></textarea>
+              <div class="form-group">
+                <label for="th-aansprakelijkheid">Huurdersaansprakelijkheid</label>
+                <input id="th-aansprakelijkheid" type="text" placeholder="Click here to enter text." />
               </div>
             </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="th-onroerende-verfraaiingen">Onr. verfraaiingen</label>
+                <input id="th-onroerende-verfraaiingen" type="text" placeholder="Click here to enter text." />
+              </div>
+              <div class="form-group">
+                <label for="th-inhoud">Inhoud</label>
+                <input id="th-inhoud" type="text" placeholder="Click here to enter text." />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="th-inboedel">Inboedel</label>
+                <input id="th-inboedel" type="text" placeholder="Click here to enter text." />
+              </div>
+              <div class="form-group">
+                <label for="th-koopwaar">Koopwaar</label>
+                <input id="th-koopwaar" type="text" placeholder="Click here to enter text." />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="th-materiaal">Materiaal</label>
+                <input id="th-materiaal" type="text" placeholder="Click here to enter text." />
+              </div>
+              <div class="form-group">
+                <label for="th-motorrijtuigen">Motorrijtuigen in rust</label>
+                <input id="th-motorrijtuigen" type="text" placeholder="Click here to enter text." />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="th-zonnepanelen">Zonnepanelen</label>
+                <input id="th-zonnepanelen" type="text" placeholder="Click here to enter text." />
+              </div>
+              <div class="form-group">
+                <label for="th-andere">Andere</label>
+                <input id="th-andere" type="text" placeholder="Click here to enter text." />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group-full">
+                <label for="th-kapitalen-opmerkingen">Opmerkingen</label>
+                <textarea id="th-kapitalen-opmerkingen" rows="2" placeholder="Click here to enter text."></textarea>
+              </div>
+            </div>
+            </details>
           </fieldset>
 
-          <!-- Antecedenten -->
-          <fieldset class="section-fieldset">
-            <legend>Antecedenten</legend>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-antecedent-incident">Eerdere incidenten</label>
-                <select id="th-antecedent-incident" name="antecedentIncidenten">
-                  <option value=""></option>
-                  <option>Ja – inbraak met schade (laatste 12 maanden)</option>
-                  <option>Ja – poging tot inbraak</option>
-                  <option>Ja – vandalisme/vernieling zonder diefstal</option>
-                  <option>Neen</option>
-                  <option>Niet gekend / niet meegedeeld</option>
-                  <option>Zie opmerkingen</option>
-                </select>
-              </div>
-              <div class="form-group-full">
-                <label for="th-antecedent-omschrijving">Omschrijving incident(en)</label>
-                <input id="th-antecedent-omschrijving" type="text" placeholder="bv. Inbraak via achterdeur, november 2023, gereedschap gestolen" />
-              </div>
-            </div>
-          </fieldset>
 
-          <!-- Inhoud -->
+
           <fieldset class="section-fieldset">
-            <legend>Inhoud</legend>
+            <legend>Gebouw</legend>
             <div class="form-row">
               <div class="form-group-full">
-                <label for="th-inhoud-omschrijving">Omschrijving inhoud</label>
-                <textarea id="th-inhoud-omschrijving" rows="3" placeholder="bv. Elektronica, cashgeld, professionele apparatuur, juwelen, documenten,…"></textarea>
+                <label for="th-gebouw">Gebouw</label>
+                <input id="th-gebouw" name="gebouw" type="text" placeholder="tekst" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label for="th-dekking">Dekking</label>
-                <select id="th-dekking" name="dekking">
-                  <option value=""></option>
-                  <option>Ja – AR</option>
-                  <option>Ja – Genoemde gevaren incl. diefstaldekking</option>
-                  <option>Neen</option>
-                  <option>Zie opmerkingen</option>
-                </select>
+                <label for="th-gebruik">Gebruik</label>
+                <input id="th-gebruik" name="gebruik" type="text" placeholder="tekst" />
               </div>
               <div class="form-group">
-                <label for="th-verzekeraar">Opmerkingen</label>
-                <input id="th-verzekeraar" type="text" placeholder="25%, eerste risicodekking..." />
+                <label for="th-bezetting">Bezetting</label>
+                <input id="th-bezetting" name="bezetting" type="text" placeholder="tekst" />
               </div>
             </div>
-          </fieldset>
-
-          <!-- Kluis -->
-          <fieldset class="section-fieldset">
-            <legend>Kluis</legend>
             <div class="form-row">
-              <div class="form-group">
-                <label for="th-kluis-aanwezig">Kluis aanwezig</label>
-                <select id="th-kluis-aanwezig" name="kluisAanwezig">
-                  <option value=""></option>
-                  <option>Ja – gecertificeerd (EN 1143-1 / EN 14450)</option>
-                  <option>Ja – niet-gecertificeerd (huishoudkluis/archiefkast)</option>
-                  <option>Neen</option>
-                  <option>Zie opmerkingen</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="th-kluis-merk">Merk & Klasse</label>
-                <input id="th-kluis-merk" type="text" placeholder="bv. Chubbsafes DuoGuard II, klasse S2" />
+              <div class="form-group-full">
+                <label>Constructie</label>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label for="th-kluis-afm">Afmetingen & Gewicht</label>
-                <input id="th-kluis-afm" type="text" placeholder="bv. H 65×B 45×D 45 cm – ± 180 kg" />
+                <label for="th-constructie-ouderdom">Ouderdom</label>
+                <input id="th-constructie-ouderdom" name="constructieOuderdom" type="text" placeholder="tekst" />
               </div>
               <div class="form-group">
-                <label for="th-kluis-elektrisch">Elektronisch slot</label>
-                <select id="th-kluis-elektrisch" name="kluisElektrisch">
-                  <option value=""></option>
-                  <option>Ja – met tijdsvertraging / blokkering</option>
-                  <option>Ja – basis elektronisch slot</option>
-                  <option>Magneetcontact</option>
-                  <option>Trilbeveiliging</option>
-                  <option>Magneetcontact & Trilbeveiliging</option>
-                  <option>Geen info</option>
-                </select>
+                <label for="th-constructie-oppervlakte">Oppervlakte</label>
+                <input id="th-constructie-oppervlakte" name="constructieOppervlakte" type="text" placeholder="tekst" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group-full">
+                <label for="th-constructie-beschrijving">Beschrijf constructie</label>
+                <input id="th-constructie-beschrijving" name="constructieBeschrijving" type="text" placeholder="tekst" />
+              </div>
+            </div>
+            
+            <!-- Verwarming -->
+            <div class="form-row">
+              <div class="form-group-full">
+                <label>Verwarming</label>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label for="th-kluis-mechanisch">Mechanisch slot</label>
-                <select id="th-kluis-mechanisch" name="kluisMechanisch">
+                <label for="th-verwarming-type">Type</label>
+                <select id="th-verwarming-type" name="verwarmingType">
                   <option value=""></option>
-                  <option>Ja – sleutelslot</option>
-                  <option>Ja – combinatieslot</option>
-                  <option>Neen</option>
+                  <option>CV</option>
+                  <option>CV + individuele verwarmingstoestellen</option>
+                  <option>Individuele verwarmingstoestellen</option>
+                  <option>Warmtepomp</option>
+                  <option>Airco</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="th-kluis-standplaats">Standplaats</label>
-                <select id="th-kluis-standplaats" name="kluisStandplaats">
+                <label for="th-verwarming-brandstof">Brandstof</label>
+                <select id="th-verwarming-brandstof" name="verwarmingBrandstof">
                   <option value=""></option>
-                  <option>elektronisch beveiligde zone, zichtbaar</option>
-                  <option>elektronisch beveiligde zone, niet zichtbaar</option>
-                  <option>niet beveiligde zone, zichtbaar</option>
-                  <option>niet beveiligde zone, niet zichtbaar</option>
+                  <option>Stookolie</option>
+                  <option>Gas</option>
+                  <option>Elektriciteit</option>
+                  <option>Hout</option>
+                  <option>Deels stookolie, deels gas</option>
+                  <option>Deels stookolie, deels elektriciteit</option>
+                  <option>Deels stookolie, deels hout</option>
+                  <option>Deels gas, deels elektriciteit</option>
+                  <option>Deels gas, deels hout</option>
+                  <option>Deels hout, deels elektriciteit</option>
                 </select>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label for="th-kluis-waarde">Geschatte waarde inhoud</label>
-                <input id="th-kluis-waarde" type="text" placeholder="bv. €25.000 – juwelen en documenten" />
+                <label for="th-verwarming-locatie">Locatie</label>
+                <input id="th-verwarming-locatie" name="verwarmingLocatie" type="text" placeholder="tekst" />
               </div>
               <div class="form-group">
-                <label for="th-kluis-conform">Conform normering?</label>
-                <select id="th-kluis-conform" name="kluisConform">
+                <label for="th-verwarming-stookplaats">Stookplaats</label>
+                <select id="th-verwarming-stookplaats" name="verwarmingStookplaats">
                   <option value=""></option>
-                  <option>Ja – conform met normering en verankering</option>
-                  <option>Gedeeltelijk – niet verankerd of onbekend type</option>
-                  <option>Neen – ongeschikt voor waarde</option>
+                  <option>Ja,conform</option>
+                  <option>Niet conform, maar aanvaardbaar</option>
+                  <option>Niet conform, slechts aanvaardbaar mits preventie</option>
+                  <option>Niet conform, niet aanvaardbaar</option>
+                  <option>Nvt</option>
                 </select>
               </div>
             </div>
             <div class="form-row">
+              <div class="form-group-full">
+                <label for="th-verwarming-opm">OPM.</label>
+                <input id="th-verwarming-opm" name="verwarmingOpm" type="text" placeholder="tekst" />
+              </div>
+            </div>
+            <!-- Elektriciteit -->
+            <div class="form-row">
+              <div class="form-group-full">
+                <label>Elektriciteit</label>
+              </div>
+            </div>
+            <div class="form-row">
               <div class="form-group">
-                <label for="th-kluis-beoordeling">Beoordeling</label>
-                <select id="th-kluis-beoordeling" name="kluisBeoordeling">
+                <label for="th-elektriciteit-laagspanning">Laagspanning</label>
+                <select id="th-elektriciteit-laagspanning" name="elektriciteitLaagspanning">
                   <option value=""></option>
                   <option>Aanvaardbaar</option>
-                  <option>Aanvaardbaar mits upgrade</option>
                   <option>Niet aanvaardbaar</option>
+                  <option>Aanvaardbaar mits preventie</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="th-elektriciteit-hoogspanning">Hoogspanning</label>
+                <select id="th-elektriciteit-hoogspanning" name="elektriciteitHoogspanning">
+                  <option value=""></option>
+                  <option>Aanvaardbaar</option>
+                  <option>Niet aanvaardbaar</option>
+                  <option>Aanvaardbaar mits preventie</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="th-elektriciteit-thermografie">Thermografie</label>
+                <select id="th-elektriciteit-thermografie" name="elektriciteitThermografie">
+                  <option value=""></option>
+                  <option>Aanvaardbaar</option>
+                  <option>Niet aanvaardbaar</option>
+                  <option>Aanvaardbaar mits preventie</option>
+                  <option>Nvt</option>
                 </select>
               </div>
               <div class="form-group-full">
-                <label for="th-kluis-opm">Opmerkingen kluis</label>
-                <textarea id="th-kluis-opm" rows="2" placeholder="bv. Kluis staat in wasplaats zonder verankering."></textarea>
+                <label for="th-elektriciteit-opm">OPM.</label>
+                <input id="th-elektriciteit-opm" name="elektriciteitOpm" type="text" placeholder="tekst" />
               </div>
             </div>
+            <!-- Zonnepanelen -->
+            <details class="zonnepanelen-section">
+            <summary>➕ Zonnepanelen</summary>
+
+            <div class="form-row">
+              <div class="form-group-full">
+                <label>Zonnepanelen</label>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="th-zonnepanelen-eigendom">Eigendom</label>
+                <input id="th-zonnepanelen-eigendom" name="zonnepanelenEigendom" type="text" placeholder="tekst"/>
+              </div>
+              <div class="form-group">
+                <label for="th-zonnepanelen-opp">Oppervlakte/Aantal/KW</label>
+                <input id="th-zonnepanelen-opp" name="zonnepanelenOpp" type="text" placeholder="tekst" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group-full">
+                <label for="th-zonnepanelen-opstelling">Opstelling omvormers</label>
+                <select id="th-zonnepanelen-opstelling" name="zonnepanelenOpstelling">
+                  <option value=""></option>
+                  <option>Aanvaardbaar</option>
+                  <option>Niet aanvaardbaar</option>
+                  <option>Aanvaardbaar mits preventie</option>
+                </select>
+              </div>
+            </details>
+            </div>
           </fieldset>
+          
+        </div>
+      </section>
+
+ <section class="diefstal-section">
+  <div class="section-container">
+    <details class="Waarborgrisico's">
+      <summary>➕ Waarborgrisico's</summary>
+    <fieldset class="section-fieldset">
+      <legend>Waarborgrisico's</legend>
+
+      <!-- Water -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-waarborg-water-status">Water</label>
+          <select id="th-waarborg-water-status" name="waarborgWaterStatus">
+            <option value=""></option>
+            <option>Aanvaardbaar</option>
+            <option>Niet-aanvaardbaar</option>
+            <option>Aanvaardbaar mits preventie</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-waarborg-water-schade">Reeds aanwezige schade?</label>
+          <select id="th-waarborg-water-schade" name="waarborgWaterSchade">
+            <option value=""></option>
+            <option>Ja</option>
+            <option>Neen</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group-full">
+          <label for="th-waarborg-water-opm">Opmerkingen schade</label>
+          <textarea id="th-waarborg-water-opm" rows="2" placeholder="bv. zichtbare vochtplekken onder raamkozijn…"></textarea>
+        </div>
+      </div>
+
+      <!-- Glasbraak -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-waarborg-glas-status">Glasbraak</label>
+          <select id="th-waarborg-glas-status" name="waarborgGlasStatus">
+            <option value=""></option>
+            <option>Aanvaardbaar</option>
+            <option>Niet-aanvaardbaar</option>
+            <option>Aanvaardbaar mits preventie</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-waarborg-glas-schade">Reeds aanwezige schade?</label>
+          <select id="th-waarborg-glas-schade" name="waarborgGlasSchade">
+            <option value=""></option>
+            <option>Ja</option>
+            <option>Neen</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group-full">
+          <label for="th-waarborg-glas-opm">Opmerkingen schade</label>
+          <textarea id="th-waarborg-glas-opm" rows="2" placeholder="bv. barst in raam linkervoorkamer…"></textarea>
+        </div>
+      </div>
+
+      <!-- Storm en hagel -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-waarborg-storm-status">Storm en hagel</label>
+          <select id="th-waarborg-storm-status" name="waarborgStormStatus">
+            <option value=""></option>
+            <option>Aanvaardbaar</option>
+            <option>Niet-aanvaardbaar</option>
+            <option>Aanvaardbaar mits preventie</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-waarborg-storm-schade">Reeds aanwezige schade?</label>
+          <select id="th-waarborg-storm-schade" name="waarborgStormSchade">
+            <option value=""></option>
+            <option>Ja</option>
+            <option>Neen</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group-full">
+          <label for="th-waarborg-storm-opm">Opmerkingen schade</label>
+          <textarea id="th-waarborg-storm-opm" rows="2" placeholder="bv. kapotte dakpan achteraan…"></textarea>
+        </div>
+      </div>
+
+      <!-- Aanrijding -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-waarborg-aanrijding-status">Aanrijding</label>
+          <select id="th-waarborg-aanrijding-status" name="waarborgAanrijdingStatus">
+            <option value=""></option>
+            <option>Aanvaardbaar</option>
+            <option>Niet-aanvaardbaar</option>
+            <option>Aanvaardbaar mits preventie</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-waarborg-aanrijding-schade">Reeds aanwezige schade?</label>
+          <select id="th-waarborg-aanrijding-schade" name="waarborgAanrijdingSchade">
+            <option value=""></option>
+            <option>Ja</option>
+            <option>Neen</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group-full">
+          <label for="th-waarborg-aanrijding-opm">Opmerkingen schade</label>
+          <textarea id="th-waarborg-aanrijding-opm" rows="2" placeholder="bv. deurschade linkerkant…"></textarea>
+        </div>
+      
+      </div>
+      </details>
+    </fieldset>
+  </div>
+</section>
+
 
           <!-- Beveiligingen van het terrein -->
           <fieldset class="section-fieldset">

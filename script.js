@@ -140,15 +140,15 @@ function genereerPDF() {
    * @param {string} text - De tekst van de titel.
    */
   function drawTitle(text) {
-    const fontSizePt = 11;
-    const lineWidth = 0.2; // Dikte van de oranje lijnen
+    const fontSizePt = 14;
+    const lineWidth = 0.15; // Dikte van de oranje lijnen
     
     // Afstanden:
     // distTopLineToBaseline: Afstand van het midden van de bovenste lijn tot de baseline van de tekst.
     // Gekozen zodat de lijn netjes boven de kapitalen/ascenders van de tekst komt.
     // Een 11pt Gill Sans MT heeft een cap height van ong. 2.6mm en ascender van ong. 2.8mm.
     // Als we de lijn 3mm boven de baseline plaatsen, is er een kleine ruimte boven de letters.
-    const distTopLineToBaseline = 3.0; // mm 
+    const distTopLineToBaseline = 4.0; // mm 
     
     // distBaselineToBottomLine: Afstand van de baseline van de tekst tot het midden van de onderste lijn.
     // Gevraagd om deze dichterbij te brengen. 1.5mm is een goede waarde.
@@ -167,7 +167,7 @@ function genereerPDF() {
 
     doc.setFont("Gill Sans MT", "bold");
     doc.setFontSize(fontSizePt);
-    doc.setTextColor(0); // Zwarte tekstkleur
+    doc.setTextColor(0, 75, 134); // Zwarte tekstkleur
     doc.setDrawColor(255, 102, 0); // Oranje kleur voor de lijnen
     doc.setLineWidth(lineWidth);
 
@@ -192,6 +192,29 @@ function genereerPDF() {
     y = yLine2 + (lineWidth / 2) + spaceAfterBlock;
   }
 
+  function drawSubtitle(text) {
+  const fontSizePt = 12;                  // Kies een iets kleiner formaat voor de subtitle
+  const spaceAfterBlock = 4;              // Ruimte na de subtitle (mm)
+
+  // Zorg dat er genoeg ruimte is op de pagina
+  // We nemen hier puur de teksthoogte + extra marge, je kunt dit naar smaak aanpassen
+  // Aannemende dat 1pt ≈ 0.35mm: height ≈ fontSizePt * 0.35
+  const approxTextHeight = fontSizePt * 0.35; // mm
+  ensureSpace(approxTextHeight + spaceAfterBlock);
+
+  // Instellingen voor de subtitle
+  doc.setFont("Gill Sans MT", "bold");
+  doc.setFontSize(fontSizePt);
+  doc.setTextColor(255, 102, 0);            // RGB voor blauw
+
+  // Tekst plaatsen
+  // y is de huidige verticale positie (in mm omgezet naar punten door jsPDF intern)
+  doc.text(text, margin, y);
+
+  // y bijwerken voor de volgende content
+  // We voegen de teksthoogte en de extra ruimte toe
+  y += approxTextHeight + spaceAfterBlock;
+}
   /**
    * Slaat het gegenereerde PDF-document op.
    * De bestandsnaam wordt dynamisch bepaald op basis van de waarde van het 'beheerder' inputveld.
@@ -288,6 +311,10 @@ function genereerPDF() {
       ["Datum Rapport", "datumrapport"]
     ];
 
+        // reset kleur naar zwart voor de velden
+        doc.setTextColor(0,0,0);
+        doc.setFont("Gill Sans MT","bold");
+
     doc.setFontSize(11);
     basisgegevensFields.forEach(([label, elementId]) => {
       const inputElement = document.getElementById(elementId);
@@ -317,6 +344,11 @@ function genereerPDF() {
 
       drawTitle(section.title);
       // Verdeel lange tekst over meerdere regels, passend binnen de paginabreedte (met marges)
+
+      // reset kleur naar zwart voor de velden
+      doc.setTextColor(0,0,0);
+      doc.setFont("Gill Sans MT","normal");
+
       const lines = doc.splitTextToSize(textContent, pageWidth - 2 * margin);
       doc.setFont("Gill Sans MT", "normal"); // Zorg dat de body tekst normaal is
       doc.setFontSize(11);
@@ -327,54 +359,236 @@ function genereerPDF() {
       });
     });
 
-    // ---------------------------------------------------------------------------
-    // SECTIE: DIEFSTALSECTIES (Dynamisch opgebouwd)
-    // ---------------------------------------------------------------------------
-    const diefstalCategories = [
-      { title: "Omgeving", ids: ["th-ligging", "th-bouwtype", "th-toegangen", "th-sociale", "th-risicoadres", "th-risicoadres-omschrijving", "th-vlucht", "th-omgevings-opm"] },
-      { title: "Antecedenten", ids: ["th-antecedent-incident", "th-antecedent-omschrijving"] },
-      { title: "Inhoud", ids: ["th-inhoud-omschrijving", "th-dekking", "th-verzekeraar"] },
-      { title: "Kluis", ids: ["th-kluis-aanwezig", "th-kluis-merk", "th-kluis-afm", "th-kluis-elektrisch", "th-kluis-mechanisch", "th-kluis-standplaats", "th-kluis-waarde", "th-kluis-conform", "th-kluis-beoordeling", "th-kluis-opm"] },
-      { title: "Beveiliging terrein", ids: ["th-terrein-beoordeling", "th-perimetermaatregelen"] },
-      { title: "Mechanische beveiliging", ids: ["th-mech-gevels", "th-mech-dak", "th-mech-deuren", "th-mech-poorten", "th-mech-vaste-ramen", "th-mech-open-ramen", "th-mech-koepels", "th-mech-opm"] },
-      { title: "Elektronische beveiliging", ids: ["th-elec-alarmsysteem", "th-elec-installateur", "th-elec-fod", "th-elec-incert", "th-elec-onderhoud", "th-elec-conformiteit", "th-elec-doormelding", "th-elec-omschrijving"] }
-    ];
+    doc.addPage();
+    y = margin;    
+// ---------------------------------------------------------------------------
+// SECTIE: DIEFSTALSECTIES (Dynamisch opgebouwd)
+// ---------------------------------------------------------------------------
+const diefstalCategories = [
+  { title: "Algemeen", ids: [
+      "th-activiteit","th-uitbreidingen","th-hoedanigheid","th-meerdere-huurders",
+      "th-huurders-omschrijving","th-gebruik-opmerkingen","th-kapitaal","th-gebouw",
+      "th-aansprakelijkheid","th-onroerende-verfraaiingen","th-inhoud","th-inboedel",
+      "th-koopwaar","th-materiaal","th-motorrijtuigen","th-zonnepanelen","th-andere",
+      "th-kapitalen-opmerkingen"
+    ]
+  },
+  { title: "Gebouw", ids: [
+      "th-gebouw","th-gebruik","th-bezetting",
+      "th-constructie-ouderdom","th-constructie-oppervlakte","th-constructie-beschrijving",
+      "th-verwarming-type","th-verwarming-brandstof","th-verwarming-locatie",
+      "th-verwarming-stookplaats","th-verwarming-opm",
+      "th-elektriciteit-laagspanning","th-elektriciteit-hoogspanning",
+      "th-elektriciteit-thermografie","th-elektriciteit-opm",
+      "th-zonnepanelen-eigendom","th-zonnepanelen-opp","th-zonnepanelen-opstelling"
+    ]
+  },
+  { title: "Waarborgrisico's", ids: ["th-waarborg-water-status","th-waarborg-water-schade","th-waarborg-water-opm","th-waarborg-glas-status","th-waarborg-glas-schade","th-waarborg-glas-opm","th-waarborg-storm-status","th-waarborg-storm-schade","th-waarborg-storm-opm","th-waarborg-aanrijding-status","th-waarborg-aanrijding-schade","th-waarborg-aanrijding-opm"] },
+  { title: "Kluis", ids: [
+      "th-kluis-aanwezig","th-kluis-merk","th-kluis-afm","th-kluis-elektrisch",
+      "th-kluis-mechanisch","th-kluis-standplaats","th-kluis-waarde","th-kluis-conform",
+      "th-kluis-beoordeling","th-kluis-opm"
+    ]
+  },
+  { title: "Beveiliging terrein", ids: ["th-terrein-beoordeling","th-perimetermaatregelen"] },
+  { title: "Mechanische beveiliging", ids: [
+      "th-mech-gevels","th-mech-dak","th-mech-deuren","th-mech-poorten",
+      "th-mech-vaste-ramen","th-mech-open-ramen","th-mech-koepels","th-mech-opm"
+    ]
+  },
+  { title: "Elektronische beveiliging", ids: [
+      "th-elec-alarmsysteem","th-elec-installateur","th-elec-fod","th-elec-incert",
+      "th-elec-onderhoud","th-elec-conformiteit","th-elec-doormelding","th-elec-omschrijving"
+    ]
+  }
+];
 
-    doc.setFontSize(11);
-    diefstalCategories.forEach(category => {
-      // Controleer eerst of er minstens één veld in deze categorie een waarde heeft
-      const hasValues = category.ids.some(id => {
-        const element = document.getElementById(id);
-        return element && element.value.trim();
-      });
+doc.setFontSize(11);
 
-      if (hasValues) {
-        drawTitle(category.title);
-        category.ids.forEach(id => {
-          const inputElement = document.getElementById(id);
-          const value = inputElement ? inputElement.value.trim() : "";
-          if (!value) return; // Sla dit specifieke veld over als het leeg is
+// Subgroepen voor Algemeen
+const algemeenGroups = [
+  { subtitle: 'Aard van de activiteit',
+    ids: ['th-activiteit','th-uitbreidingen']
+  },
+  { subtitle: 'Gebruik',
+    ids: ['th-hoedanigheid','th-meerdere-huurders','th-huurders-omschrijving','th-gebruik-opmerkingen']
+  },
+  { subtitle: 'Kapitalen',
+    ids: [
+      'th-kapitaal','th-gebouw','th-aansprakelijkheid','th-onroerende-verfraaiingen',
+      'th-inhoud','th-inboedel','th-koopwaar','th-materiaal','th-motorrijtuigen',
+      'th-zonnepanelen','th-andere','th-kapitalen-opmerkingen'
+    ]
+  }
+];
 
-          // Label (haal 'th-' prefix weg voor weergave)
-          const label = id.replace(/^th-/, '').replace(/-/g, ' '); // Vervang '-' met spaties voor betere leesbaarheid
-          const formattedLabel = label.charAt(0).toUpperCase() + label.slice(1); // Eerste letter hoofdletter
+// Subgroepen voor Gebouw
+const gebouwGroups = [
+  { subtitle: 'Gebruik',
+    ids: ['th-gebouw','th-gebruik','th-bezetting']
+  },
+  { subtitle: 'Constructie',
+    ids: ['th-constructie-ouderdom','th-constructie-oppervlakte','th-constructie-beschrijving']
+  },
+  { subtitle: 'Verwarming',
+    ids: [
+      'th-verwarming-type','th-verwarming-brandstof','th-verwarming-locatie',
+      'th-verwarming-stookplaats','th-verwarming-opm'
+    ]
+  },
+   { subtitle: 'Elektriciteit',
+    ids: ['th-elektriciteit-laagspanning','th-elektriciteit-hoogspanning',
+      'th-elektriciteit-thermografie','th-elektriciteit-opm']
+  },
+     { subtitle: 'Zonnepanelen',
+    ids: ['th-zonnepanelen-eigendom','th-zonnepanelen-opp','th-zonnepanelen-opstelling']
+  },
+];
 
-          // Verdeel de waarde over meerdere regels indien nodig
-          const lines = doc.splitTextToSize(value, pageWidth - 2 * margin - 50); // 50mm gereserveerd voor label
-          const blockHeight = lines.length * 6; // Hoogte van de tekstblock
-          
-          ensureSpace(blockHeight + 2); // +2 voor kleine marge onder label
+// Hulpfunctie om velden te renderen
+function renderFields(ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    const val = el?.value.trim();
+    if (!val) return;
 
-          doc.setFont("Gill Sans MT", "bold");
-          doc.text(`${formattedLabel}:`, margin, y);
-          doc.setFont("Gill Sans MT", "normal");
-          doc.text(lines, margin + 50, y); // Tekst van waarde naast het label
-          y += blockHeight + 4; // Verhoog y met hoogte van tekstblok + extra ruimte
-        });
-      }
+    const labelRaw = id.replace(/^th-/, '').replace(/-/g, ' ');
+    const label = labelRaw.charAt(0).toUpperCase() + labelRaw.slice(1);
+    const lines = doc.splitTextToSize(val, pageWidth - 2*margin - 50);
+    const height = lines.length * 6;
+    ensureSpace(height + 2);
+
+    doc.setFont('Gill Sans MT','bold');
+    doc.text(`${label}:`, margin, y);
+    doc.setFont('Gill Sans MT','normal');
+    doc.text(lines, margin + 50, y);
+    y += height + 4;
+  });
+}
+
+diefstalCategories.forEach(category => {
+  // --- Algemeen ---
+  if (category.title === 'Algemeen') {
+    const anyAlg = algemeenGroups.some(g =>
+      g.ids.some(id => document.getElementById(id)?.value.trim())
+    );
+    if (!anyAlg) return;
+
+    drawTitle('Algemeen');
+    algemeenGroups.forEach(group => {
+      const has = group.ids.some(id => document.getElementById(id)?.value.trim());
+      if (!has) return;
+      drawSubtitle(group.subtitle);
+      doc.setTextColor(0,0,0);
+      doc.setFontSize(11);
+      renderFields(group.ids);
     });
 
-    // -------------------------------------------------------
+  // --- Gebouw ---
+  } else if (category.title === 'Gebouw') {
+    const anyGeb = gebouwGroups.some(g =>
+      g.ids.some(id => document.getElementById(id)?.value.trim())
+    );
+    if (!anyGeb) return;
+
+    drawTitle('Gebouw');
+    gebouwGroups.forEach(group => {
+      const has = group.ids.some(id => document.getElementById(id)?.value.trim());
+      if (!has) return;
+      drawSubtitle(group.subtitle);
+      doc.setTextColor(0,0,0);
+      doc.setFontSize(11);
+      renderFields(group.ids);
+    });
+
+      // --- Waarborgrisico's als eigen sectie met tabel ---
+} else if (category.title === "Waarborgrisico's") {
+  // 1) Data-array
+  const wbRows = [
+    { label: 'Water',          statusId: 'th-waarborg-water-status',    schadeId: 'th-waarborg-water-schade',    commentId: 'th-waarborg-water-opm' },
+    { label: 'Storm en hagel', statusId: 'th-waarborg-storm-status',    schadeId: 'th-waarborg-storm-schade',    commentId: 'th-waarborg-storm-opm' },
+    { label: 'Aanrijding',     statusId: 'th-waarborg-aanrijding-status',schadeId: 'th-waarborg-aanrijding-schade',commentId: 'th-waarborg-aanrijding-opm' },
+    { label: 'Glasbraak',      statusId: 'th-waarborg-glas-status',     schadeId: 'th-waarborg-glas-schade',     commentId: 'th-waarborg-glas-opm' }
+  ];
+
+  // 2) Check of er iets ingevuld is
+  const anyWb = wbRows.some(r =>
+    document.getElementById(r.statusId)?.value.trim() ||
+    document.getElementById(r.schadeId)?.value.trim() ||
+    document.getElementById(r.commentId)?.value.trim()
+  );
+  if (!anyWb) return;
+
+  // 3) Titel
+  drawTitle("Waarborgrisico's");
+      doc.setTextColor(0,0,0);
+      doc.setFontSize(11);
+
+  // 4) Instellingen
+  const colWidths = [40, 40, 50, pageWidth - margin*2 - 40 - 40 - 50];
+  const lineHeight = 6; // mm per regel
+
+  // 5) Header: zorg dat de header als geheel past
+  ensureSpace(lineHeight);
+  doc.setFont("Gill Sans MT","bold").setFontSize(11);
+  let x = margin;
+  ['Waarborgen','Status','Reeds aanwezige schade','Commentaar'].forEach((h,i) => {
+    doc.text(h, x + 2, y + lineHeight - 2);
+    x += colWidths[i];
+  });
+  doc.setDrawColor(0);
+  doc.rect(margin, y, pageWidth - margin*2, lineHeight);
+  y += lineHeight;
+
+  // 6) Data rijen (met dynamische hoogte en automatic page breaks)
+  doc.setFont("Gill Sans MT","normal").setFontSize(10);
+  wbRows.forEach(r => {
+    const get = id => document.getElementById(id)?.value.trim() || '-';
+    const cells = [r.label, get(r.statusId), get(r.schadeId), get(r.commentId)];
+
+    // bepaal per cel hoeveel regels nodig
+    const linesPerCell = cells.map((txt,i) =>
+      doc.splitTextToSize(txt, colWidths[i] - 4)
+    );
+    const maxLines = Math.max(...linesPerCell.map(l=>l.length));
+    const rowHeight = maxLines * lineHeight + 2;
+
+    // Pagina‐break indien de rij er niet volledig past
+    ensureSpace(rowHeight);
+
+    // teken de inhoud van elke cel
+    let cx = margin;
+    linesPerCell.forEach((lines,i) => {
+      lines.forEach((ln, li) => {
+        doc.text(ln, cx + 2, y + (li+1)*lineHeight - 2);
+      });
+      cx += colWidths[i];
+    });
+
+    // teken celranden
+    doc.rect(margin, y, pageWidth - margin*2, rowHeight);
+    y += rowHeight;
+  });
+
+  // voeg wat ruimte toe na de tabel
+  y += 4;
+
+
+    
+  // --- Overige categorieën ---
+  } else {
+    const hasOther = category.ids.some(id => document.getElementById(id)?.value.trim());
+    if (!hasOther) return;
+
+    drawTitle(category.title);
+    doc.setTextColor(0,0,0);
+    doc.setFontSize(11);
+    renderFields(category.ids);
+  }
+});
+
+
+// -------------------------------------------------------
 // SECTIE: BESLUIT
 // Nieuwe pagina na diefstal, voor clausules
 // -------------------------------------------------------
@@ -647,74 +861,111 @@ y += boxH + 6;                     // ruimte na het kader
 
       // Functie om afbeeldingen één voor één asynchroon te verwerken en toe te voegen.
       // Gebruikt een IIFE (Immediately Invoked Function Expression) met recursie.
-      (function processImageFile(index) {
-        if (index >= files.length) {
-          // Alle afbeeldingen zijn verwerkt, sla de PDF op.
-          savePdf();
-          return;
+(function processImageFile(index) {
+  if (index >= files.length) {
+    savePdf();
+    return;
+  }
+  const file = files[index];
+
+  // 1) Lees EXIF uit
+  EXIF.getData(file, function() {
+    const orientation = EXIF.getTag(this, "Orientation") || 1;
+    console.log("Orientation for", file.name, "=", orientation);
+
+    // 2) Lees de file als DataURL voor de Image()
+    const urlReader = new FileReader();
+    urlReader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        // 3) Maak canvas van de juiste afmetingen
+        let sw = img.width, sh = img.height;
+        const canvas  = document.createElement("canvas");
+        const ctx     = canvas.getContext("2d");
+
+        // Bij 90°-rotaties wisselen we width/height
+        if (orientation >= 5 && orientation <= 8) {
+          canvas.width  = sh;
+          canvas.height = sw;
+        } else {
+          canvas.width  = sw;
+          canvas.height = sh;
         }
 
-        const reader = new FileReader();
-        reader.onerror = () => {
-          console.error(`Fout bij het lezen van bestand: ${files[index].name}`);
-          processImageFile(index + 1); // Ga door met de volgende afbeelding
-        };
+        // 4) Pas transform toe
+        switch (orientation) {
+          case 2: // flipX
+            ctx.translate(sw, 0);
+            ctx.scale(-1, 1);
+            break;
+          case 3: // 180°
+            ctx.translate(sw, sh);
+            ctx.rotate(Math.PI);
+            break;
+          case 4: // flipY
+            ctx.translate(0, sh);
+            ctx.scale(1, -1);
+            break;
+          case 5: // 90° CW + flipX
+            ctx.rotate(0.5 * Math.PI);
+            ctx.scale(1, -1);
+            break;
+          case 6: // 90° CW
+            ctx.translate(sh, 0);
+            ctx.rotate(0.5 * Math.PI);
+            break;
+          case 7: // 90° CCW + flipX
+            ctx.translate(sh, 0);
+            ctx.rotate(0.5 * Math.PI);
+            ctx.scale(-1, 1);
+            break;
+          case 8: // 90° CCW
+            ctx.translate(0, sw);
+            ctx.rotate(-0.5 * Math.PI);
+            break;
+          default:
+            // orientation == 1: niks doen
+            break;
+        }
 
-        reader.onload = function(event) {
-          const img = new Image();
-          img.onerror = () => {
-            console.error(`Fout bij het laden van afbeelding: ${files[index].name}`);
-            processImageFile(index + 1); // Ga door met de volgende afbeelding
-          };
+        // 5) Teken de image
+        ctx.drawImage(img, 0, 0);
 
-          img.onload = function() {
-            // Bereken de afmetingen van de afbeelding om te passen binnen maxW x maxH, met behoud van aspect ratio.
-            let w = img.width;
-            let h = img.height;
-            if (w > maxImgWidth) {
-              h = (maxImgWidth / w) * h;
-              w = maxImgWidth;
-            }
-            if (h > maxImgHeight) {
-              w = (maxImgHeight / h) * w;
-              h = maxImgHeight;
-            }
-            
-            // Bereken x-positie. Start nieuwe rij als nodig.
-            let xPos = margin + currentColumn * (maxImgWidth + gapX);
+        // 6) Gebruik de gecorrigeerde dataURL
+        const fixedDataUrl = canvas.toDataURL("image/jpeg");
 
-            // Controleer of er een nieuwe pagina of nieuwe rij nodig is.
-            if (currentColumn === 0 && index > 0) { // Begin van een nieuwe rij (niet de allereerste afbeelding)
-                // Eerst controleren of dit de eerste afbeelding van een *nieuwe* rij is na een volle rij
-                // De y-positie is al verhoogd na de vorige rij.
-            }
+        // 7) Schaal zoals voorheen
+        let w = canvas.width, h = canvas.height;
+        if (w > maxImgWidth) { h = (maxImgWidth / w) * h; w = maxImgWidth; }
+        if (h > maxImgHeight){ w = (maxImgHeight / h) * w; h = maxImgHeight; }
 
-            // Controleer of de afbeelding op de huidige pagina past.
-            // Als we aan het begin van een kolom staan en het past niet, nieuwe pagina.
-            if (y + h > pageHeight - margin) {
-              doc.addPage();
-              y = margin;
-              drawTitle("Fotobewijs (vervolg)"); // Titel voor vervolgpagina
-              currentColumn = 0; // Reset kolom op nieuwe pagina
-              xPos = margin; // Reset xPos voor de eerste kolom
-            }
+        let xPos = margin + currentColumn * (maxImgWidth + gapX);
+        if (y + h > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+          currentColumn = 0;
+          xPos = margin;
+          drawTitle("Fotobewijs (vervolg)");
+        }
+        doc.addImage(fixedDataUrl, "JPEG", xPos, y, w, h, undefined, "FAST");
 
-            // Voeg de afbeelding toe.
-            doc.addImage(img, "JPEG", xPos, y, w, h, undefined, "FAST"); // "FAST" voor snellere rendering (kan kwaliteit beïnvloeden)
+        currentColumn++;
+        if (currentColumn >= imagesPerRow) {
+          currentColumn = 0;
+          y += maxImgHeight + gapY;
+        }
 
-            currentColumn++;
-            if (currentColumn >= imagesPerRow) {
-              currentColumn = 0; // Reset naar eerste kolom
-              y += maxImgHeight + gapY; // Ga naar volgende rij
-            }
+        // Volgende afbeelding
+        processImageFile(index + 1);
+      };
+      img.src = e.target.result;
+    };
+    urlReader.readAsDataURL(file);
+  });
+})(0);
 
-            // Verwerk de volgende afbeelding.
-            processImageFile(index + 1);
-          };
-          img.src = event.target.result; // event.target.result bevat de base64 data URL
-        };
-        reader.readAsDataURL(files[index]); // Lees het bestand als Data URL (base64)
-      })(0); // Start de verwerking met de eerste afbeelding (index 0)
+
+
 
     } else {
       // Geen afbeeldingen, sla de PDF direct op.
