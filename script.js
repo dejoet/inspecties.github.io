@@ -384,12 +384,8 @@ const diefstalCategories = [
     ]
   },
   { title: "Waarborgrisico's", ids: ["th-waarborg-water-status","th-waarborg-water-schade","th-waarborg-water-opm","th-waarborg-glas-status","th-waarborg-glas-schade","th-waarborg-glas-opm","th-waarborg-storm-status","th-waarborg-storm-schade","th-waarborg-storm-opm","th-waarborg-aanrijding-status","th-waarborg-aanrijding-schade","th-waarborg-aanrijding-opm"] },
-  { title: "Kluis", ids: [
-      "th-kluis-aanwezig","th-kluis-merk","th-kluis-afm","th-kluis-elektrisch",
-      "th-kluis-mechanisch","th-kluis-standplaats","th-kluis-waarde","th-kluis-conform",
-      "th-kluis-beoordeling","th-kluis-opm"
-    ]
-  },
+  { title: "Compartimentering", ids: ["th-comp-risico-meerdere","th-comp-aanpalingen-derden","th-comp-inwendig-ei60","th-comp-stookplaats","th-comp-technisch-lokaal","th-comp-opslag-brandbare","th-comp-mpl","th-comp-eml","th-comp-opmerkingen"] },
+
   { title: "Beveiliging terrein", ids: ["th-terrein-beoordeling","th-perimetermaatregelen"] },
   { title: "Mechanische beveiliging", ids: [
       "th-mech-gevels","th-mech-dak","th-mech-deuren","th-mech-poorten",
@@ -501,6 +497,8 @@ diefstalCategories.forEach(category => {
       renderFields(group.ids);
     });
 
+    doc.addPage();
+    y = margin;     
       // --- Waarborgrisico's als eigen sectie met tabel ---
 } else if (category.title === "Waarborgrisico's") {
   // 1) Data-array
@@ -571,7 +569,100 @@ diefstalCategories.forEach(category => {
   });
 
   // voeg wat ruimte toe na de tabel
-  y += 4;
+  y += 10;
+
+} else if (category.title === 'Compartimentering') {
+  drawTitle('Compartimentering');
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+
+  // Definieer je velden
+  const rows = [
+    { label: 'Het risico bestaat uit meerdere vrijstaande gebouwen', id: 'th-comp-risico-meerdere' },
+    { label: 'Aanpalingen met derden',                           id: 'th-comp-aanpalingen-derden' },
+    { label: 'Inwendige compartimenten, minimum (R)EI 60',       id: 'th-comp-inwendig-ei60' },
+    { label: 'Stookplaats',                                       id: 'th-comp-stookplaats' },
+    { label: 'Technisch lokaal',                                  id: 'th-comp-technisch-lokaal' },
+    { label: 'Opslag brandbare producten',                        id: 'th-comp-opslag-brandbare' }
+  ];
+
+  const col1 = margin;
+  const col1W = 85;
+  const col2 = margin + col1W + 5;
+  const col2W = pageWidth - margin - col2;
+
+
+  // Rijen
+  doc.setFont('Gill Sans MT', 'normal').setFontSize(11);
+  rows.forEach(r => {
+    const raw = document.getElementById(r.id)?.value.trim();
+    const val = raw === '' ? '–' : raw;
+
+    // hoogte
+    const lines1 = doc.splitTextToSize(r.label, col1W);
+    const lines2 = doc.splitTextToSize(val,     col2W);
+    const count = Math.max(lines1.length, lines2.length);
+    const rowH = count * 6 + 4;
+    ensureSpace(rowH);
+
+    // cell randen
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+    doc.rect(col1, y, col1W, rowH);
+    doc.rect(col2, y, col2W, rowH);
+
+    // inhoud
+    lines1.forEach((ln, i) => doc.text(ln, col1 + 2, y + 6 + i * 6));
+    lines2.forEach((ln, i) => doc.text(ln, col2 + 2, y + 6 + i * 6));
+
+    y += rowH;
+  });
+
+  y += 8;
+
+  // MPL (%)
+  const mpl = document.getElementById('th-comp-mpl')?.value.trim();
+  if (mpl) {
+    ensureSpace(14);
+    doc.setFont('Gill Sans MT','bold').text('MPL (%):', col1, y);
+    doc.setFont('Gill Sans MT','normal').text(mpl,     col2, y);
+    y += 12;
+
+    const descMPL = 'de ‘maximum possible loss’ is de schade die ontstaat wanneer de minst gunstige omstandigheden zich uitzonderlijk samen voordoen en het schadegeval hierdoor niet of slecht wordt bestreden en slechts door een onoverkomelijke hindernis of door gebrek aan voeding tot staan wordt gebracht';
+    doc.setFont('Gill Sans MT','italic').setFontSize(10);
+    doc.splitTextToSize(descMPL, pageWidth - 2 * margin)
+       .forEach(line => { ensureSpace(6); doc.text(line, margin, y); y += 6; });
+    doc.setFontSize(11);
+    y += 8;
+  }
+
+  // EML (%)
+  const eml = document.getElementById('th-comp-eml')?.value.trim();
+  if (eml) {
+    ensureSpace(14);
+    doc.setFont('Gill Sans MT','bold').text('EML (%):', col1, y);
+    doc.setFont('Gill Sans MT','normal').text(eml,     col2, y);
+    y += 12;
+
+    const descEML = 'de ‘estimated maximum loss’ is de schade die kan voorkomen tijdens normale uitbatingsomstandigheden, bij normale bezetting, en houdt rekening met de middelen eigen aan het bedrijf, die in normale omstandigheden de uitbreiding van schade kunnen voorkomen en aldus het schadebedrag kunnen beperken';
+    doc.setFont('Gill Sans MT','italic').setFontSize(10);
+    doc.splitTextToSize(descEML, pageWidth - 2 * margin)
+       .forEach(line => { ensureSpace(6); doc.text(line, margin, y); y += 6; });
+    doc.setFontSize(11);
+    y += 8;
+  }
+
+  // Opmerkingen
+  const comments = document.getElementById('th-comp-opmerkingen')?.value.trim();
+  if (comments) {
+    ensureSpace(14);
+    doc.setFont('Gill Sans MT','bold').text('Opmerkingen mbt compartimentering:', margin, y);
+    y += 8;
+    doc.setFont('Gill Sans MT','normal').setFontSize(11);
+    doc.splitTextToSize(comments, pageWidth - 2 * margin)
+       .forEach(line => { ensureSpace(6); doc.text(line, margin, y); y += 6; });
+    y += 8;
+  }
 
 
     
@@ -597,10 +688,11 @@ y = margin;               // terug naar boven
 // 1) Kader en titel “Besluit” in 14pt
 const boxH = 12;                    // hoogte van het kader in mm
 ensureSpace(boxH + 4);              // ruimte voor kader + marge
-doc.setDrawColor(0);                // zwarte rand
-doc.setLineWidth(0.5);
+doc.setDrawColor(255, 102, 0);                // zwarte rand
+doc.setLineWidth(0.15);
 doc.rect(margin, y, pageWidth - 2 * margin, boxH);  // kader
 doc.setFont("Gill Sans MT","bold").setFontSize(14);
+doc.setTextColor(0, 75, 134); 
 doc.text(
   "Besluit",
   margin + 2,                     // klein inspringen van de tekst
@@ -608,6 +700,9 @@ doc.text(
   { baseline: "middle" }
 );
 y += boxH + 6;                     // ruimte na het kader
+
+      doc.setTextColor(0,0,0);
+      doc.setFontSize(11);
 
 // 1) Herinspectie
 {
@@ -645,10 +740,19 @@ y += boxH + 6;                     // ruimte na het kader
 
 // 3) Technische beoordeling
 {
-  const val = document.getElementById('besluit-technische').value || '-';
-  ensureSpace(7);
-  doc.setFont('Gill Sans MT','bold').setFontSize(11).text('Technische beoordeling:', margin, y);
-  doc.setFont('Gill Sans MT','normal').text(val, margin + 50, y);
+  const val = document.getElementById('besluit-technische').value.trim() || '-';
+
+  // Zorg dat er ruimte is voor twee regels (label + antwoord)
+  ensureSpace(14);
+
+  // Label
+  doc.setFont('Gill Sans MT','bold').setFontSize(11);
+  doc.text('Technische beoordeling:', margin, y);
+  y += 7;
+
+  // Antwoord, ingesprongen
+  doc.setFont('Gill Sans MT','normal').setFontSize(11);
+  doc.text(val, margin + 10, y);
   y += 7;
 }
 

@@ -538,180 +538,333 @@
 </section>
 
 
-          <!-- Beveiligingen van het terrein -->
-          <fieldset class="section-fieldset">
-            <legend>Beveiligingen van het terrein</legend>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-terrein-beoordeling">Beoordeling terrein</label>
-                <select id="th-terrein-beoordeling" name="terreinBeoordeling">
-                  <option value=""></option>
-                  <option>NVT – geen buitenruimte / gesloten gebouw</option>
-                  <option>Neen – open en vrij toegankelijk</option>
-                  <option>Ja – hekwerk, niet aanvaardbaar</option>
-                  <option>Ja – afsluiting aanwezig zonder detectie</option>
-                  <option>Ja – afsluiting aanwezig met detectie</option>
-                </select>
-              </div>
-              <div class="form-group-full">
-                <label for="th-perimetermaatregelen">Perimetermaatregelen</label>
-                <textarea id="th-perimetermaatregelen" rows="2" placeholder="bv. IJzeren schuifpoort zonder slot, …"></textarea>
-              </div>
-            </div>
-          </fieldset>
+<section class="compartimentering-section">
+  <div class="section-container">
+    <details class="compartimentering">
+      <summary>➕ Compartimentering</summary>
+      <fieldset class="section-fieldset">
+        <legend>Compartimentering</legend>
 
-          <!-- Mechanische beveiligingen -->
-          <fieldset class="section-fieldset">
-            <legend>Mechanische beveiligingen</legend>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-mech-gevels">Gevels</label>
-                <select id="th-mech-gevels" name="mechGevels">
-                  <option value=""></option>
-                  <option>Geen opvallende risico’s</option>
-                  <option>Openingen zichtbaar</option>
-                  <option>Onbeschermde wand</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="th-mech-dak">Dak</label>
-                <select id="th-mech-dak" name="mechDak">
-                  <option value=""></option>
-                  <option>Niet toegankelijk</option>
-                  <option>Beveiligd</option>
-                  <option>Niet beveiligd, aanvaardbaar</option>
-                  <option>Niet beveiligd, niet aanvaardbaar</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-mech-deuren">Toegangsdeuren</label>
-                <select id="th-mech-deuren" name="mechDeuren">
-                  <option value=""></option>
-                  <option>Aanvaardbaar</option>
-                  <option>Niet aanvaardbaar</option>
-                  <option>Niet noodzakelijk</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="th-mech-poorten">Poorten</label>
-                <select id="th-mech-poorten" name="mechPoorten">
-                  <option value=""></option>
-                  <option>Sectionaal met slot</option>
-                  <option>Oprol zonder slot</option>
-                  <option>Geen poort</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-mech-vaste-ramen">Vaste ramen</label>
-                <select id="th-mech-vaste-ramen" name="mechVasteRamen">
-                  <option value=""></option>
-                  <option>Aanvaardbaar</option>
-                  <option>niet aanvaardbaar</option>
-                  <option>Niet noodzakelijk</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="th-mech-open-ramen">Opengaande ramen</label>
-                <select id="th-mech-open-ramen" name="mechOpenRamen">
-                  <option value=""></option>
-                  <option>Raamvergrendeling</option>
-                  <option>Slot of contact</option>
-                  <option>Niet beveiligd, aanvaardbaar</option>
-                  <option>Niet beveiligd, niet aanvaardbaar</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-mech-koepels">Dakramen / lichtkoepels</label>
-                <select id="th-mech-koepels" name="mechKoepels">
-                  <option value=""></option>
-                  <option>Niet aanwezig</option>
-                  <option>Beveiligd</option>
-                  <option>Niet beveiligd, aanvaardbaar</option>
-                  <option>Niet beveiligd, niet aanvaardbaar</option>
-                </select>
-              </div>
-              <div class="form-group-full">
-                <label for="th-mech-opm">Opmerkingen mechanisch</label>
-                <textarea id="th-mech-opm" rows="2" placeholder="bv. Geen raamcontacten."></textarea>
-              </div>
-            </div>
-          </fieldset>
-
-          <!-- Elektronische beveiligingen -->
-          <fieldset class="section-fieldset">
-            <legend>Elektronische beveiligingen</legend>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-elec-alarmsysteem">Alarmsysteem aanwezig</label>
-                <select id="th-elec-alarmsysteem" name="elecAlarmsysteem">
-                  <option value=""></option>
-                  <option>Ja – INCERT-conform + meldkamer</option>
-                  <option>Ja – INCERT - naar GSM</option>
-                  <option>Ja – geen INCERT</option>
-                  <option>Ja – deels</option>
-                  <option>Ja – onbekend</option>
-                  <option>Neen</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="th-elec-installateur">Installateur</label>
-                <input id="th-elec-installateur" type="text" placeholder="bv. SECURE NV"/>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-elec-fod">FOD-erkenning</label>
-                <input id="th-elec-fod" type="text" placeholder="bv. Ministerieel nr."/>
-              </div>
-              <div class="form-group">
-                <label for="th-elec-incert">INCERT-nr.</label>
-                <input id="th-elec-incert" type="text" placeholder="bv. A1234"/>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-elec-onderhoud">Onderhoudscontract</label>
-                <select id="th-elec-onderhoud" name="elecOnderhoud">
-                  <option value=""></option>
-                  <option>Ja – jaarlijks</option>
-                  <option>Neen</option>
-                  <option>Niet gekend</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="th-elec-conformiteit">Conformiteitsattest</label>
-                <select id="th-elec-conformiteit" name="elecConformiteit">
-                  <option value=""></option>
-                  <option>Ja</option>
-                  <option>Neen</option>
-                  <option>Niet gekend</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="th-elec-doormelding">Doormelding naar meldkamer</label>
-                <select id="th-elec-doormelding" name="elecDoormelding">
-                  <option value=""></option>
-                  <option>Ja – gecertificeerde</option>
-                  <option>Ja – niet-gecertificeerde</option>
-                  <option>Neen</option>
-                </select>
-              </div>
-              <div class="form-group-full">
-                <label for="th-elec-omschrijving">Omschrijving elektronische beveiliging</label>
-                <textarea id="th-elec-omschrijving" rows="2" placeholder="bv. 6 IR-detectoren, 4 contacten"></textarea>
-              </div>
-            </div>
-          </fieldset>
+        <!-- Vrijstaande gebouwen -->
+        <div class="form-row">
+          <div class="form-group-full">
+            <label for="th-comp-risico-meerdere">Het risico bestaat uit meerdere vrijstaande gebouwen</label>
+            <select id="th-comp-risico-meerdere" name="compRisicoMeerdere">
+            <option value=""></option>
+            <option>Onderlinge afstand > 20m</option>
+            <option>Ja, brandveilige afstand min. 10m</option>
+            <option>Ja, afstand tss. 5-10m</option>
+            <option>Ja, afstand < 5m</option>
+            <option>Neen</option>
+            </select>
+          </div>
         </div>
-      </section>
+
+        <!-- Aanpalingen & Afstand naast elkaar -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="th-comp-aanpalingen-derden">Aanpalingen met derden</label>
+            <select id="th-comp-aanpalingen-derden" name="compAanpalingenDerden">
+            <option value=""></option>
+            <option>Ja, aanpalend, zonder Rf-muur 120'</option>
+            <option>Ja, aanpalend, met Rf-muur 120'</option>
+            <option>Ja, met brandwerende scheidingsmuur Rf 60'</option>
+            <option>Neen, afstand > 20m</option>
+            <option>Neen</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Inwendige compartimenten -->
+        <div class="form-row">
+          <div class="form-group-full">
+            <label for="th-comp-inwendig-ei60">Inwendige compartimenten, minimum (R)EI 60</label>
+            <select id="th-comp-inwendig-ei60" name="compInwendigEI60">
+            <option value=""></option>
+            <option>Neen,zie preventie</option>
+            <option>Ja, zie opmerkingen</option>
+            <option>Niet noodzakelijk vereist</option>
+            <option>Ja</option>
+            <option>Neen</option>
+            <option>nvt</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Nieuwe keuzemenus -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="th-comp-stookplaats">Stookplaats</label>
+            <select id="th-comp-stookplaats" name="compStookplaats">
+            <option value=""></option>
+            <option>Neen,zie preventie</option>
+            <option>Ja, zie opmerkingen</option>
+            <option>Niet noodzakelijk vereist</option>
+            <option>Ja</option>
+            <option>Neen</option>
+            <option>nvt</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="th-comp-technisch-lokaal">Technisch lokaal</label>
+            <select id="th-comp-technisch-lokaal" name="compTechnischLokaal">
+            <option value=""></option>
+            <option>Neen,zie preventie</option>
+            <option>Ja, zie opmerkingen</option>
+            <option>Niet noodzakelijk vereist</option>
+            <option>Ja</option>
+            <option>Neen</option>
+            <option>nvt</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="th-comp-opslag-brandbare">Opslag brandbare producten</label>
+            <select id="th-comp-opslag-brandbare" name="compOpslagBrandbare">
+            <option value=""></option>
+            <option>Neen,zie preventie</option>
+            <option>Ja, zie opmerkingen</option>
+            <option>Niet noodzakelijk vereist</option>
+            <option>Ja</option>
+            <option>Neen</option>
+            <option>nvt</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- MPL & EML als percentage-invoer -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="th-comp-mpl">MPL (%)</label>
+            <input id="th-comp-mpl" name="compMPL" type="text" placeholder="bv. 75 %" />
+          </div>
+          <div class="form-group">
+            <label for="th-comp-eml">EML (%)</label>
+            <input id="th-comp-eml" name="compEML" type="text" placeholder="bv. 50 %" />
+          </div>
+        </div>
+
+        <!-- Opmerkingen -->
+        <div class="form-row">
+          <div class="form-group-full">
+            <label for="th-comp-opmerkingen">Opmerkingen mbt compartimentering</label>
+            <textarea id="th-comp-opmerkingen" rows="2" placeholder="Click here to enter text."></textarea>
+          </div>
+        </div>
+
+      </fieldset>
+    </details>
+  </div>
+</section>
+
+<!-- Housekeeping -->
+<section class="housekeeping-section">
+  <div class="section-container">
+    <details class="Housekeeping">
+      <summary>➕ Housekeeping</summary>
+    <fieldset class="section-fieldset">
+      <legend>Housekeeping</legend>
+
+      <div class="form-row">
+        <div class="form-group-full">
+          <label for="th-house-staat-onderh">Staat/onderh. gebouwen, terrein, omheining</label>
+          <select id="th-house-staat-onderh" name="houseStaatOnderh">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-house-orde-netheid">Orde, netheid binnen de zaak</label>
+          <select id="th-house-orde-netheid" name="houseOrdeNetheid">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-house-opslag-buiten">Opslag goederen buiten</label>
+          <select id="th-house-opslag-buiten" name="houseOpslagBuiten">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-house-rookbeleid">Rookbeleid</label>
+          <select id="th-house-rookbeleid" name="houseRookbeleid">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-house-afvalbeleid">Afvalbeleid</label>
+          <select id="th-house-afvalbeleid" name="houseAfvalbeleid">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-house-opslag-koopwaar">Opslag koopwaar (hoogte > 10 cm)</label>
+          <select id="th-house-opslag-koopwaar" name="houseOpslagKoopwaar">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group-full">
+          <label for="th-house-opm">OPM.</label>
+          <textarea id="th-house-opm" name="houseOpm" rows="2" placeholder="Click here to enter text."></textarea>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+</section>
+
+<!-- Preventie -->
+<section class="preventie-section">
+  <div class="section-container">
+    <details class="Preventie">
+      <summary>➕ Preventie</summary>
+    <fieldset class="section-fieldset">
+      <legend>Preventie</legend>
+
+      <!-- Algemeen beleid -->
+      <div class="form-row">
+        <div class="form-group-full">
+          <label>Algemeen beleid</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-prev-houding">Houding naar preventie/beleid</label>
+          <select id="th-prev-houding" name="prevHouding">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+        <div class="form-group-full">
+          <label for="th-prev-alg-opm">OPM.</label>
+          <textarea id="th-prev-alg-opm" name="prevAlgOpm" rows="2" placeholder="Click here to enter text."></textarea>
+        </div>
+      </div>
+
+      <!-- Detectiesystemen -->
+      <div class="form-row">
+        <div class="form-group-full">
+          <label for="th-prev-detectiesysteem">Detectiesystemen</label>
+          <select id="th-prev-detectiesysteem" name="prevDetectiesysteem">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-prev-inbraak">Inbraak</label>
+          <select id="th-prev-inbraak" name="prevInbraak">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-prev-brand">Brand</label>
+          <select id="th-prev-brand" name="prevBrand">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-prev-gas">Gas</label>
+          <select id="th-prev-gas" name="prevGas">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-prev-gas-locatie">Locatie</label>
+          <input id="th-prev-gas-locatie" name="prevGasLocatie" type="text" placeholder="Click here to enter text." />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group-full">
+          <label for="th-prev-detect-opm">OPM.</label>
+          <textarea id="th-prev-detect-opm" name="prevDetectOpm" rows="2" placeholder="Click here to enter text."></textarea>
+        </div>
+      </div>
+
+      <!-- Blusmiddelen -->
+      <div class="form-row">
+        <div class="form-group-full">
+          <label for="th-prev-blusmiddelen">Blusmiddelen</label>
+          <select id="th-prev-blusmiddelen" name="prevBlusmiddelen">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-prev-blus-deken">Blusdeken</label>
+          <select id="th-prev-blus-deken" name="prevBlusDeken">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-prev-blus-emmer">Vlamdovende emmer</label>
+          <select id="th-prev-blus-emmer" name="prevBlusEmmer">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-prev-blus-manueel">Manuele</label>
+          <select id="th-prev-blus-manueel" name="prevBlusManueel">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="th-prev-blus-autom">Autom. blussysteem CV</label>
+          <select id="th-prev-blus-autom" name="prevBlusAutom">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="th-prev-blus-sprinkler">Sprinkler</label>
+          <select id="th-prev-blus-sprinkler" name="prevBlusSprinkler">
+            <option value=""></option>
+            <option>Choose an item</option>
+          </select>
+        </div>
+        <div class="form-group-full">
+          <label for="th-prev-blus-opm">OPM.</label>
+          <textarea id="th-prev-blus-opm" name="prevBlusOpm" rows="2" placeholder="Click here to enter text."></textarea>
+        </div>
+      </div>
+
+    </fieldset>
+    </details>
+  </div>
+</section>
+
 
       <!-- ─── BESLUIT ─────────────────────────────────────────── -->
 <section class="besluit-section">
@@ -722,20 +875,21 @@
       <label for="besluit-herinspectie">Herinspectie</label>
       <select id="besluit-herinspectie">
         <option value="">-- Kies --</option>
-        <option>Optie 1</option>
-        <option>Optie 2</option>
-        <option>Optie 3</option>
-        <option>Optie 4</option>
+        <option>Ja,binnen 1 jaar</option>
+        <option>Ja,binnen 2 jaar</option>
+        <option>Ja,binnen 3 jaar</option>
+        <option>Neen</option>
+        <option>Beslissing bij underwriter</option>
       </select>
     </div>
     <div class="form-group">
       <label for="besluit-antecedenten">Antecedenten</label>
       <select id="besluit-antecedenten">
         <option value="">-- Kies --</option>
-        <option>Optie A</option>
-        <option>Optie B</option>
-        <option>Optie C</option>
-        <option>Optie D</option>
+        <option>Ja</option>
+        <option>Neen, aldus verzekerde/producent</option>
+        <option>Niet gekend</option>
+        <option>Nieuwe zaak</option>
       </select>
     </div>
   </div>
@@ -752,9 +906,9 @@
       <label for="besluit-technische">Technische beoordeling</label>
       <select id="besluit-technische">
         <option value="">-- Kies --</option>
-        <option>Goed</option>
-        <option>Matig</option>
-        <option>Slecht</option>
+        <option>K1: UITSTEKEND RISICO: boven gemiddelde. kan aanvaard worden zonder bijkomende preventie.</option>
+        <option>K2: AANVAARDBAAR risico, gemiddeld. Aanvaardbaar mits stipte uitvoering van het preventieplan.</option>
+        <option>K3: Minder goed risico, onder het gemiddelde. NIET aanvaardbaar, zelfs niet met bijkomende preventie.</option>
       </select>
     </div>
   </div>
